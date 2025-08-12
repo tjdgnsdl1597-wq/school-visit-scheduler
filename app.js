@@ -1,12 +1,12 @@
-// app.js - 전역 애플리케이션 관리 (로그인 기능 포함)
+// app.js - 전역 애플리케이션 관리 (인증 기능 완전 제거)
 
 window.App = {
     supabase: supabase.createClient(
         "https://harsxljqcnyfgsueiwvq.supabase.co",
-        "eyJhbGciOiJIJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhcnN4bGpxY255ZmdzdWVpd3ZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NDQ2OTYsImV4cCI6MjA3MDUyMDY5Nn0.jyXqWN_IwNagbxXCikO2dJxvegWS0Wblo79rb87f2Rg"
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhcnN4bGpxY255ZmdzdWVpd3ZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NDQ2OTYsImV4cCI6MjA3MDUyMDY5Nn0.jyXqWN_IwNagbxXCikO2dJxvegWS0Wblo79rb87f2Rg"
     ),
-    user: null, // 로그인한 사용자 정보를 저장할 변수
     
+    // 공통 데이터
     SCHOOLS: [
         "숭덕여자중학교", "숭덕여자고등학교", "인천예림학교", "간석여자중학교", "삼산유치원",
         "인천초은중학교", "인천루원중학교", "인천가석초등학교", "상정중학교", "제물포중학교",
@@ -17,6 +17,7 @@ window.App = {
         "칼빈매니토바국제학교", "영흥초등학교(분기)", "덕적초중고등학교(분기)"
     ],
 
+    // 공통 유틸리티 함수
     fillTimeOptions: (startSelectEl, endSelectEl) => {
         if (!startSelectEl || !endSelectEl) return;
         startSelectEl.innerHTML = "";
@@ -30,79 +31,20 @@ window.App = {
         }
     },
 
-    fetchMyVisits: async (rangeStart = null, rangeEnd = null) => {
-        if (!App.user) return [];
-        let query = App.supabase.from('visits').select('*').eq('user_id', App.user.id);
+    // 모든 방문 일정을 가져옵니다. (사용자 구분 없음)
+    fetchAllVisits: async (rangeStart = null, rangeEnd = null) => {
+        let query = App.supabase.from('visits').select('*');
         if (rangeStart) query = query.gte('visit_date', rangeStart);
         if (rangeEnd) query = query.lte('visit_date', rangeEnd);
+        
         const { data, error } = await query.order('visit_date', { ascending: true });
+        
         if (error) {
             console.error("일정 조회 중 에러 발생:", error);
+            // 이 부분은 데이터베이스 규칙(RLS) 문제일 가능성이 높습니다.
+            alert("일정 데이터를 불러오지 못했습니다. 데이터베이스 설정을 확인하세요.");
             return [];
         }
         return data || [];
     },
-
-    handleAuth: async () => {
-        const { data: { session } } = await App.supabase.auth.getSession();
-        App.user = session?.user || null;
-
-        if (location.pathname.includes('login.html')) return;
-        
-        App.updateMainUI();
-    },
-    
-    updateMainUI: () => {
-        // [수정] index.html에 맞는 정확한 ID로 요소를 찾습니다.
-        const loginPanelEl = document.getElementById('login-panel');
-        const logoutBtn = document.getElementById('logoutBtn');
-        
-        if (!loginPanelEl || !logoutBtn) {
-            console.error("UI 요소를 찾을 수 없습니다: #login-panel 또는 #logoutBtn");
-            return;
-        }
-
-        if (App.user) {
-            // 로그인 상태: 로그인 패널 숨기고, 로그아웃 버튼 표시
-            loginPanelEl.style.display = 'none';
-            logoutBtn.style.display = 'block';
-
-            logoutBtn.onclick = async () => {
-                await App.supabase.auth.signOut();
-                location.reload();
-            };
-
-        } else {
-            // 로그아웃 상태: 로그인 패널 표시, 로그아웃 버튼 숨김
-            loginPanelEl.style.display = 'block';
-            logoutBtn.style.display = 'none';
-        }
-        
-        App.attachSidebarLoginForm();
-    },
-
-    attachSidebarLoginForm: () => {
-        const form = document.getElementById('loginFormSidebar');
-        if (!form) return;
-
-        form.onsubmit = async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('sidebar-email').value;
-            const password = document.getElementById('sidebar-password').value;
-            const errorMessageEl = document.getElementById('sidebar-error-message');
-            
-            errorMessageEl.style.display = 'none';
-
-            const { error } = await App.supabase.auth.signInWithPassword({ email, password });
-
-            if (error) {
-                errorMessageEl.textContent = "로그인 실패. 정보를 확인하세요.";
-                errorMessageEl.style.display = 'block';
-                return;
-            }
-            location.reload();
-        };
-    }
 };
-
-document.addEventListener('DOMContentLoaded', App.handleAuth);
