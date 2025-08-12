@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>학교 방문 일정 예약</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>학교 방문 일정 예약</h1>
+        <form id="visitForm">
+            <label>방문일시</label>
+            <input type="date" id="visitDate" required>
+            
+            <label>방문 시간</label>
+            <select id="startTime" required></select> ~ <select id="endTime" required></select>
+            
+            <label>방문 용건</label>
+            <div id="purposeList">
+                <label><input type="checkbox" value="월점검"> 월점검</label>
+                <label><input type="checkbox" value="위험성평가"> 위험성평가</label>
+                <label><input type="checkbox" value="근골조사"> 근골조사</label>
+                <label><input type="checkbox" value="교육"> 교육</label>
+                <label><input type="checkbox" value="산재조사"> 산재조사</label>
+                <label><input type="checkbox" value="기타"> 기타</label>
+            </div>
+            <input type="text" id="etcPurpose" placeholder="기타 내용" style="display:none;">
+
+            <label>교육 종류</label>
+            <input type="text" id="eduType" placeholder="교육 선택 시 입력">
+
+            <label>학교 선택</label>
+            <select id="schoolSelect" required></select>
+
+            <button type="submit">저장</button>
+        </form>
+
+        <h2>예약된 일정</h2>
+        <ul id="visitList"></ul>
+    </div>
+    <script src="https://unpkg.com/@supabase/supabase-js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
