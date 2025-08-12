@@ -227,26 +227,44 @@
             // Supabase 클라이언트 초기화
             const SUPABASE_URL = 'https://harsxljqcnyfgsueiwvq.supabase.co';
             const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhcnN4bGpxY255ZmdzdWVpd3ZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NDQ2OTYsImV4cCI6MjA3MDUyMDY5Nn0.jyXqWN_IwNagbxXCikO2dJxvegWS0Wblo79rb87f2Rg';
-            const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            let supabase;
+            try {
+                supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            } catch (e) {
+                console.error("Supabase 클라이언트 초기화 오류:", e);
+                // 오류가 발생하면 supabase 변수를 null로 설정하여 다음 코드에서 오류가 나지 않도록 함.
+                supabase = null; 
+            }
 
             const userEmailEl = document.getElementById('userEmail');
             const logoutBtn = document.getElementById('logoutBtn');
             const homeCalendarEl = document.getElementById('homeCalendar');
             const todoListEl = document.getElementById('todoList');
             const memoBoxEl = document.getElementById('memoBox');
-
+            
             // 1. 사용자 인증 및 UI 업데이트
-            const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-            if (user) {
-                userEmailEl.textContent = user.email;
+            if (supabase) {
+                try {
+                    const { data: { user }, error: authError } = await supabase.auth.getUser();
+                    if (user) {
+                        userEmailEl.textContent = user.email;
+                    } else {
+                        userEmailEl.textContent = '로그아웃됨';
+                        logoutBtn.style.display = 'none';
+                    }
+                } catch (e) {
+                    console.error("사용자 인증 오류:", e);
+                }
             } else {
-                userEmailEl.textContent = '로그아웃됨';
+                userEmailEl.textContent = '로그아웃됨 (Supabase 연결 오류)';
                 logoutBtn.style.display = 'none';
             }
 
+
             logoutBtn.addEventListener('click', async () => {
-                await supabase.auth.signOut();
+                if (supabase) {
+                    await supabase.auth.signOut();
+                }
                 window.location.reload();
             });
 
@@ -260,28 +278,39 @@
                     right: 'dayGridMonth,timeGridWeek,timeGridDay'
                 },
                 events: async function(fetchInfo, successCallback, failureCallback) {
-                    const { data: schedules, error } = await supabase
-                        .from('schedules')
-                        .select('*')
-                        .gte('start', fetchInfo.startStr)
-                        .lte('end', fetchInfo.endStr);
+                    // Supabase에서 일정 데이터를 가져오는 로직
+                    if (supabase) {
+                        try {
+                            const { data: schedules, error } = await supabase
+                                .from('schedules')
+                                .select('*')
+                                .gte('start', fetchInfo.startStr)
+                                .lte('end', fetchInfo.endStr);
 
-                    if (error) {
-                        console.error('Error fetching schedules:', error.message);
-                        failureCallback(error);
-                    } else {
-                        const events = schedules.map(schedule => ({
-                            id: schedule.id,
-                            title: schedule.title,
-                            start: schedule.start,
-                            end: schedule.end,
-                            color: schedule.color,
-                            extendedProps: {
-                                schoolName: schedule.schoolName,
-                                purposes: schedule.purposes
+                            if (error) {
+                                console.error('Error fetching schedules:', error.message);
+                                failureCallback(error);
+                                return;
                             }
-                        }));
-                        successCallback(events);
+
+                            const events = schedules.map(schedule => ({
+                                id: schedule.id,
+                                title: schedule.title,
+                                start: new Date(schedule.start),
+                                end: new Date(schedule.end),
+                                color: schedule.color,
+                                extendedProps: {
+                                    schoolName: schedule.schoolName,
+                                    purposes: schedule.purposes
+                                }
+                            }));
+                            successCallback(events);
+                        } catch (e) {
+                            console.error('Error in fetching schedules:', e);
+                            failureCallback(e);
+                        }
+                    } else {
+                        successCallback([]); // Supabase 연결 실패 시 빈 배열 반환
                     }
                 }
             });
@@ -289,39 +318,44 @@
 
             // 3. 미완료 업무 목록 렌더링
             async function renderTodoList() {
-                const { data: todos, error } = await supabase.from('todos').select('*');
-                
-                if (error) {
-                    console.error('Error fetching todos:', error.message);
-                    return;
-                }
-
-                todoListEl.innerHTML = '';
-                todos.forEach(todo => {
-                    const li = document.createElement('li');
-                    li.classList.add('list-item');
-                    if (todo.completed) {
-                        li.classList.add('completed');
+                if (supabase) {
+                    const { data: todos, error } = await supabase.from('todos').select('*');
+                    
+                    if (error) {
+                        console.error('Error fetching todos:', error.message);
+                        return;
                     }
-                    li.innerHTML = `
-                        <input type="checkbox" ${todo.completed ? 'checked' : ''} data-id="${todo.id}">
-                        <span>${todo.text}</span>
-                    `;
-                    todoListEl.appendChild(li);
-                });
 
-                todoListEl.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                    checkbox.addEventListener('change', async (e) => {
-                        const id = e.target.dataset.id;
-                        const isCompleted = e.target.checked;
-                        const { error } = await supabase.from('todos').update({ completed: isCompleted }).eq('id', id);
-                        if (error) {
-                            console.error('Error updating todo:', error.message);
-                        } else {
-                            e.target.parentElement.classList.toggle('completed', isCompleted);
+                    todoListEl.innerHTML = ''; // 기존 목록 초기화
+                    todos.forEach(todo => {
+                        const li = document.createElement('li');
+                        li.classList.add('list-item');
+                        if (todo.completed) {
+                            li.classList.add('completed');
                         }
+                        li.innerHTML = `
+                            <input type="checkbox" ${todo.completed ? 'checked' : ''} data-id="${todo.id}">
+                            <span>${todo.text}</span>
+                        `;
+                        todoListEl.appendChild(li);
                     });
-                });
+
+                    // 체크박스 클릭 이벤트 핸들러
+                    todoListEl.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                        checkbox.addEventListener('change', async (e) => {
+                            const id = e.target.dataset.id;
+                            const isCompleted = e.target.checked;
+                            const { error } = await supabase.from('todos').update({ completed: isCompleted }).eq('id', id);
+                            if (error) {
+                                console.error('Error updating todo:', error.message);
+                            } else {
+                                e.target.parentElement.classList.toggle('completed', isCompleted);
+                            }
+                        });
+                    });
+                } else {
+                    todoListEl.innerHTML = `<li><div class="muted small">데이터베이스 연결 실패</div></li>`;
+                }
             }
             renderTodoList();
 
@@ -341,21 +375,23 @@
             loadMemo();
             
             // 5. Supabase 실시간 동기화 (일정, 할 일 목록)
-            supabase
-                .channel('realtime_schedules')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'schedules' }, payload => {
-                    console.log('Change received!', payload);
-                    calendar.refetchEvents();
-                })
-                .subscribe();
+            if (supabase) {
+                supabase
+                    .channel('realtime_schedules')
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'schedules' }, payload => {
+                        console.log('Change received!', payload);
+                        calendar.refetchEvents();
+                    })
+                    .subscribe();
 
-            supabase
-                .channel('realtime_todos')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'todos' }, payload => {
-                    console.log('Todo change received!', payload);
-                    renderTodoList();
-                })
-                .subscribe();
+                supabase
+                    .channel('realtime_todos')
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'todos' }, payload => {
+                        console.log('Todo change received!', payload);
+                        renderTodoList();
+                    })
+                    .subscribe();
+            }
 
         });
     </script>
