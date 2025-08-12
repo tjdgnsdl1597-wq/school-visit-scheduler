@@ -17,21 +17,66 @@ function initializeSchedulePage() {
     const etcPurposeInput = document.getElementById('etc-purpose');
     const formMessageEl = document.getElementById('form-message');
 
+    // 학교 목록 채우기
     App.SCHOOLS.forEach(school => {
         schoolSelect.add(new Option(school, school));
     });
 
+    // [수정] 시간 필터링 기능 복구
     const applyTimeFilter = () => {
-        // ... (이전과 동일)
+        const filter = periodSelect.value; // 'AM', 'PM', ''
+        const currentStart = startTimeSelect.value;
+        const currentEnd = endTimeSelect.value;
+
+        // 먼저 전체 시간 옵션을 채웁니다.
+        App.fillTimeOptions(startTimeSelect, endTimeSelect);
+
+        // 필터링이 필요한 경우 옵션을 제거합니다.
+        if (filter) {
+            const filterFn = (timeStr) => {
+                const hour = parseInt(timeStr.split(':')[0], 10);
+                return filter === 'AM' ? hour < 12 : hour >= 12;
+            };
+
+            Array.from(startTimeSelect.options).forEach(opt => {
+                if (opt.value && !filterFn(opt.value)) opt.remove();
+            });
+            Array.from(endTimeSelect.options).forEach(opt => {
+                if (opt.value && !filterFn(opt.value)) opt.remove();
+            });
+        }
+        
+        // 이전 선택값 유지
+        startTimeSelect.value = currentStart;
+        endTimeSelect.value = currentEnd;
     };
+
+    // [수정] 시작 시간 선택 시 종료 시간 자동 설정 기능 복구
     periodSelect.addEventListener('change', applyTimeFilter);
     startTimeSelect.addEventListener('change', () => {
-        // ... (이전과 동일)
+        const v = startTimeSelect.value;
+        if (!v) return;
+        let [h, m] = v.split(':').map(Number);
+        m += 30;
+        if (m >= 60) { m = 0; h += 1; }
+        const targetTime = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+        
+        if (Array.from(endTimeSelect.options).some(o => o.value === targetTime)) {
+            endTimeSelect.value = targetTime;
+        } else {
+            endTimeSelect.value = v;
+        }
     });
-    applyTimeFilter();
+    applyTimeFilter(); // 페이지 로드 시 초기 실행
 
+    // [수정] 방문 목적 선택 시 추가 입력칸 표시 기능 복구
     purposeContainer.addEventListener('change', (e) => {
-        // ... (이전과 동일)
+        if (e.target.type === 'checkbox') {
+            const eduCheckbox = document.querySelector('input[value="교육"]');
+            const etcCheckbox = document.querySelector('input[value="기타"]');
+            if(eduTypeInput) eduTypeInput.parentElement.style.display = eduCheckbox.checked ? 'block' : 'none';
+            if(etcPurposeInput) etcPurposeInput.parentElement.style.display = etcCheckbox.checked ? 'block' : 'none';
+        }
     });
 
     const calendar = new FullCalendar.Calendar(calendarEl, {
@@ -81,7 +126,6 @@ function initializeSchedulePage() {
         }
 
         const newVisit = {
-            // user_id 필드 제거
             visit_date: dateInput.value,
             school: schoolSelect.value,
             start_time: startTimeSelect.value,
@@ -105,8 +149,8 @@ function initializeSchedulePage() {
         formMessageEl.style.display = 'block';
         
         form.reset();
-        eduTypeInput.parentElement.style.display = 'none';
-        etcPurposeInput.parentElement.style.display = 'none';
+        if(eduTypeInput) eduTypeInput.parentElement.style.display = 'none';
+        if(etcPurposeInput) etcPurposeInput.parentElement.style.display = 'none';
         calendar.refetchEvents();
     });
     
