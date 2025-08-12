@@ -130,15 +130,20 @@ function initializeSchedulePage() {
             return alert('기타 목적을 입력해주세요.');
         }
 
+const checkedPurposes = Array.from(
+    purposeContainer.querySelectorAll('input[type="checkbox"]:checked')
+).map(cb => cb.value);
+
 const newVisit = {
     visit_date: dateInput.value,
     school: schoolSelect.value,
     start_time: startTimeSelect.value,
     end_time: endTimeSelect.value,
-    purposes: checkedPurposes.join(', '),
-    edu_text: eduTypeInput.value.trim() || null,     // DB 컬럼명에 맞춤
-    other_text: etcPurposeInput.value.trim() || null // DB 컬럼명에 맞춤
+    purposes: checkedPurposes, // 배열 그대로
+    edu_text: eduTypeInput.value.trim() || null,
+    other_text: etcPurposeInput.value.trim() || null
 };
+
 
 
         const { error } = await App.supabase.from('visits').insert([newVisit]);
