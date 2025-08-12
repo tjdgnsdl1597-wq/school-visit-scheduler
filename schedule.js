@@ -130,15 +130,16 @@ function initializeSchedulePage() {
             return alert('기타 목적을 입력해주세요.');
         }
 
-        const newVisit = {
-            visit_date: dateInput.value,
-            school: schoolSelect.value,
-            start_time: startTimeSelect.value,
-            end_time: endTimeSelect.value,
-            purposes: checkedPurposes.join(', '),
-            edu_type: eduTypeInput.value.trim() || null,
-            etc: etcPurposeInput.value.trim() || null,
-        };
+const newVisit = {
+    visit_date: dateInput.value,
+    school: schoolSelect.value,
+    start_time: startTimeSelect.value,
+    end_time: endTimeSelect.value,
+    purposes: checkedPurposes.join(', '),
+    edu_text: eduTypeInput.value.trim() || null,     // DB 컬럼명에 맞춤
+    other_text: etcPurposeInput.value.trim() || null // DB 컬럼명에 맞춤
+};
+
 
         const { error } = await App.supabase.from('visits').insert([newVisit]);
 
