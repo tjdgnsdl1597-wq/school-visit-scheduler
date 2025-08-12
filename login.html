@@ -1,49 +1,50 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>로그인</title>
-  <link rel="stylesheet" href="style.css"/>
-  <script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인 - 방문 일정 대시보드</title>
+    <!-- Google Fonts & Stylesheet -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Supabase JS -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 </head>
-<body class="center">
-  <div class="auth-card">
-    <img src="assets/logo.png" class="logo" alt="logo">
-    <h1>로그인</h1>
-    <form id="loginForm" class="grid">
-      <input type="email" id="email" placeholder="이메일" required />
-      <input type="password" id="password" placeholder="비밀번호(최소 6자)" required />
-      <button type="submit" class="btn primary">로그인</button>
-      <button type="button" id="signupBtn" class="btn">회원가입</button>
-    </form>
-    <div class="muted small">로그인 후 사용 가능합니다.</div>
-  </div>
+<body class="auth-page">
 
-  <script>
-    const SUPABASE_URL = "https://harsxljqcnyfgsueiwvq.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhcnN4bGpxY255ZmdzdWVpd3ZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NDQ2OTYsImV4cCI6MjA3MDUyMDY5Nn0.jyXqWN_IwNagbxXCikO2dJxvegWS0Wblo79rb87f2Rg";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="brand">
+                <div class="logo"></div>
+                <h1>방문 일정 대시보드</h1>
+            </div>
+            <p class="auth-subtitle">로그인하여 일정을 관리하세요.</p>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">이메일</label>
+                    <input type="email" id="email" placeholder="email@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">비밀번호</label>
+                    <input type="password" id="password" placeholder="최소 6자 이상" required>
+                </div>
+                
+                <!-- 에러 메시지가 표시될 영역 -->
+                <p id="errorMessage" class="error-message"></p>
 
-    const emailInput = document.getElementById('email');
-    const passwordInput = document.getElementById('password');
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">로그인</button>
+                    <button type="button" id="signupBtn" class="btn-secondary">회원가입</button>
+                </div>
+            </form>
+            <p class="auth-footer">계정이 없으신가요? 정보를 입력하고 회원가입 버튼을 누르세요.</p>
+        </div>
+    </div>
 
-    document.getElementById('loginForm').addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      const { error } = await supabase.auth.signInWithPassword({
-        email: emailInput.value, password: passwordInput.value
-      });
-      if (error) { alert('로그인 실패: ' + error.message); return; }
-      location.href = 'index.html';
-    });
-
-    document.getElementById('signupBtn').addEventListener('click', async ()=>{
-      const { error } = await supabase.auth.signUp({
-        email: emailInput.value, password: passwordInput.value
-      });
-      if (error) { alert('회원가입 실패: ' + error.message); return; }
-      alert('가입 완료! 이메일 확인 후 로그인하세요.');
-    });
-  </script>
+    <!-- Page-specific script -->
+    <script src="login.js"></script>
 </body>
 </html>
