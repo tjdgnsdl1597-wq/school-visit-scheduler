@@ -1,7 +1,7 @@
 // app.js - 전역 애플리케이션 관리 (인증 기능 완전 제거)
 
 window.App = {
-    supabase: supabase.createClient(
+    supabase: window.supabase.createClient(
         "https://harsxljqcnyfgsueiwvq.supabase.co",
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhcnN4bGpxY255ZmdzdWVpd3ZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NDQ2OTYsImV4cCI6MjA3MDUyMDY5Nn0.jyXqWN_IwNagbxXCikO2dJxvegWS0Wblo79rb87f2Rg"
     ),
