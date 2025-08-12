@@ -222,178 +222,179 @@
         </aside>
     </main>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', async function() {
-            // Supabase 클라이언트 초기화
-            const SUPABASE_URL = 'https://harsxljqcnyfgsueiwvq.supabase.co';
-            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhcnN4bGpxY255ZmdzdWVpd3ZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NDQ2OTYsImV4cCI6MjA3MDUyMDY5Nn0.jyXqWN_IwNagbxXCikO2dJxvegWS0Wblo79rb87f2Rg';
-            let supabase;
-            try {
-                supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            } catch (e) {
-                console.error("Supabase 클라이언트 초기화 오류:", e);
-                // 오류가 발생하면 supabase 변수를 null로 설정하여 다음 코드에서 오류가 나지 않도록 함.
-                supabase = null; 
-            }
+<script>
+    document.addEventListener('DOMContentLoaded', async function() {
+        // Supabase 클라이언트 초기화
+        const SUPABASE_URL = 'https://harsxljqcnyfgsueiwvq.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhcnN4bGpxY255ZmdzdWVpd3ZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NDQ2OTYsImV4cCI6MjA3MDUyMDY5Nn0.jyXqWN_IwNagbxXCikO2dJxvegWS0Wblo79rb87f2Rg';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-            const userEmailEl = document.getElementById('userEmail');
-            const logoutBtn = document.getElementById('logoutBtn');
-            const homeCalendarEl = document.getElementById('homeCalendar');
-            const todoListEl = document.getElementById('todoList');
-            const memoBoxEl = document.getElementById('memoBox');
-            
-            // 1. 사용자 인증 및 UI 업데이트
-            if (supabase) {
+        const userEmailEl = document.getElementById('userEmail');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const homeCalendarEl = document.getElementById('homeCalendar');
+        const todoListEl = document.getElementById('todoList');
+        const memoBoxEl = document.getElementById('memoBox');
+        
+        // 1. 사용자 인증 및 UI 업데이트
+        // [개선] 비로그인 시 로그인 페이지로 리디렉션하는 로직 추가
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (user) {
+            userEmailEl.textContent = user.email;
+        } else {
+            // 사용자가 없으면 로그인 페이지로 이동 (예: 'login.html')
+            // window.location.href = 'login.html'; 
+            userEmailEl.textContent = '로그인 필요';
+            logoutBtn.style.display = 'none';
+            // 비로그인 시 아래 로직들을 실행하지 않도록 함수를 조기 종료합니다.
+            return; 
+        }
+
+        logoutBtn.addEventListener('click', async () => {
+            await supabase.auth.signOut();
+            window.location.reload();
+        });
+
+        // 2. FullCalendar 초기화 (Supabase 실시간 동기화 포함)
+        const calendar = new FullCalendar.Calendar(homeCalendarEl, {
+            locale: 'ko',
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            events: async function(fetchInfo, successCallback, failureCallback) {
                 try {
-                    const { data: { user }, error: authError } = await supabase.auth.getUser();
-                    if (user) {
-                        userEmailEl.textContent = user.email;
-                    } else {
-                        userEmailEl.textContent = '로그아웃됨';
-                        logoutBtn.style.display = 'none';
-                    }
-                } catch (e) {
-                    console.error("사용자 인증 오류:", e);
-                }
-            } else {
-                userEmailEl.textContent = '로그아웃됨 (Supabase 연결 오류)';
-                logoutBtn.style.display = 'none';
-            }
+                    // [수정] 겹치는 일정을 올바르게 가져오도록 필터링 로직 수정
+                    // (시작일 <= 화면 종료일) AND (종료일 >= 화면 시작일)
+                    const { data: schedules, error } = await supabase
+                        .from('schedules')
+                        .select('*')
+                        .lte('start', fetchInfo.endStr) // 수정된 부분
+                        .gte('end', fetchInfo.startStr);   // 수정된 부분
 
-
-            logoutBtn.addEventListener('click', async () => {
-                if (supabase) {
-                    await supabase.auth.signOut();
-                }
-                window.location.reload();
-            });
-
-            // 2. FullCalendar 초기화 (Supabase 실시간 동기화 포함)
-            const calendar = new FullCalendar.Calendar(homeCalendarEl, {
-                locale: 'ko',
-                initialView: 'dayGridMonth',
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                },
-                events: async function(fetchInfo, successCallback, failureCallback) {
-                    // Supabase에서 일정 데이터를 가져오는 로직
-                    if (supabase) {
-                        try {
-                            const { data: schedules, error } = await supabase
-                                .from('schedules')
-                                .select('*')
-                                .gte('start', fetchInfo.startStr)
-                                .lte('end', fetchInfo.endStr);
-
-                            if (error) {
-                                console.error('Error fetching schedules:', error.message);
-                                failureCallback(error);
-                                return;
-                            }
-
-                            const events = schedules.map(schedule => ({
-                                id: schedule.id,
-                                title: schedule.title,
-                                start: new Date(schedule.start),
-                                end: new Date(schedule.end),
-                                color: schedule.color,
-                                extendedProps: {
-                                    schoolName: schedule.schoolName,
-                                    purposes: schedule.purposes
-                                }
-                            }));
-                            successCallback(events);
-                        } catch (e) {
-                            console.error('Error in fetching schedules:', e);
-                            failureCallback(e);
-                        }
-                    } else {
-                        successCallback([]); // Supabase 연결 실패 시 빈 배열 반환
-                    }
-                }
-            });
-            calendar.render();
-
-            // 3. 미완료 업무 목록 렌더링
-            async function renderTodoList() {
-                if (supabase) {
-                    const { data: todos, error } = await supabase.from('todos').select('*');
-                    
                     if (error) {
-                        console.error('Error fetching todos:', error.message);
+                        console.error('Error fetching schedules:', error.message);
+                        failureCallback(error);
+                        homeCalendarEl.innerHTML = `<div class="p-4 text-red-600">캘린더 일정을 불러오는데 실패했습니다.</div>`;
                         return;
                     }
 
-                    todoListEl.innerHTML = ''; // 기존 목록 초기화
+                    const events = schedules.map(schedule => ({
+                        id: schedule.id,
+                        title: schedule.title,
+                        start: new Date(schedule.start),
+                        end: new Date(schedule.end),
+                        color: schedule.color,
+                        extendedProps: {
+                            schoolName: schedule.schoolName,
+                            purposes: schedule.purposes
+                        }
+                    }));
+                    successCallback(events);
+                } catch (e) {
+                    console.error('Error in fetching schedules:', e);
+                    failureCallback(e);
+                }
+            }
+        });
+        calendar.render();
+
+        // 3. 미완료 업무 목록 렌더링
+        // [개선] 완료되지 않은(completed: false) 업무만 가져오도록 수정
+        async function renderTodoList() {
+            try {
+                const { data: todos, error } = await supabase
+                    .from('todos')
+                    .select('*')
+                    .eq('completed', false) // 완료되지 않은 항목만 선택
+                    .order('created_at', { ascending: true }); // 생성일 순으로 정렬
+
+                if (error) {
+                    console.error('Error fetching todos:', error.message);
+                    todoListEl.innerHTML = `<li><div class="muted small">데이터를 불러오지 못했습니다.</div></li>`;
+                    return;
+                }
+
+                todoListEl.innerHTML = ''; // 기존 목록 초기화
+                
+                if (todos.length === 0) {
+                    todoListEl.innerHTML = `<li><div class="muted small">미완료 업무가 없습니다. 🎉</div></li>`;
+                } else {
                     todos.forEach(todo => {
                         const li = document.createElement('li');
                         li.classList.add('list-item');
-                        if (todo.completed) {
-                            li.classList.add('completed');
-                        }
                         li.innerHTML = `
-                            <input type="checkbox" ${todo.completed ? 'checked' : ''} data-id="${todo.id}">
+                            <input type="checkbox" data-id="${todo.id}">
                             <span>${todo.text}</span>
                         `;
                         todoListEl.appendChild(li);
                     });
-
-                    // 체크박스 클릭 이벤트 핸들러
-                    todoListEl.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                        checkbox.addEventListener('change', async (e) => {
-                            const id = e.target.dataset.id;
-                            const isCompleted = e.target.checked;
-                            const { error } = await supabase.from('todos').update({ completed: isCompleted }).eq('id', id);
-                            if (error) {
-                                console.error('Error updating todo:', error.message);
-                            } else {
-                                e.target.parentElement.classList.toggle('completed', isCompleted);
-                            }
-                        });
+                }
+                
+                // 체크박스 클릭 시 완료 처리 (화면에서는 바로 숨김 처리)
+                todoListEl.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.addEventListener('change', async (e) => {
+                        const id = e.target.dataset.id;
+                        const isCompleted = e.target.checked;
+                        
+                        // 화면에서 즉시 제거하여 빠른 피드백 제공
+                        if (isCompleted) {
+                            e.target.parentElement.style.display = 'none';
+                        }
+                        
+                        const { error } = await supabase.from('todos').update({ completed: isCompleted }).eq('id', id);
+                        if (error) {
+                            console.error('Error updating todo:', error.message);
+                            // 업데이트 실패 시 다시 보이게 처리
+                            e.target.parentElement.style.display = 'flex';
+                            alert('업무 완료 처리에 실패했습니다.');
+                        }
                     });
-                } else {
-                    todoListEl.innerHTML = `<li><div class="muted small">데이터베이스 연결 실패</div></li>`;
-                }
+                });
+            } catch (e) {
+                console.error("Error rendering todo list:", e);
+                todoListEl.innerHTML = `<li><div class="muted small">데이터베이스 연결에 실패했습니다.</div></li>`;
             }
-            renderTodoList();
+        }
+        renderTodoList();
 
-            // 4. 메모사항 저장 및 불러오기 (localStorage 사용 예시)
-            function saveMemo() {
-                localStorage.setItem('userMemo', memoBoxEl.value);
+        // 4. 메모사항 저장 및 불러오기 (localStorage 사용은 유지)
+        function saveMemo() {
+            localStorage.setItem(`userMemo_${user.id}`, memoBoxEl.value);
+        }
+
+        function loadMemo() {
+            // [개선] 사용자별로 다른 메모를 저장하고 불러오도록 키 수정
+            const memo = localStorage.getItem(`userMemo_${user.id}`);
+            if (memo) {
+                memoBoxEl.value = memo;
             }
+        }
+        
+        memoBoxEl.addEventListener('input', saveMemo);
+        loadMemo();
+        
+        // 5. Supabase 실시간 동기화 (일정, 할 일 목록)
+        supabase
+            .channel('realtime_schedules')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'schedules' }, payload => {
+                console.log('Schedule change received!', payload);
+                calendar.refetchEvents();
+            })
+            .subscribe();
 
-            function loadMemo() {
-                const memo = localStorage.getItem('userMemo');
-                if (memo) {
-                    memoBoxEl.value = memo;
-                }
-            }
-            
-            memoBoxEl.addEventListener('input', saveMemo);
-            loadMemo();
-            
-            // 5. Supabase 실시간 동기화 (일정, 할 일 목록)
-            if (supabase) {
-                supabase
-                    .channel('realtime_schedules')
-                    .on('postgres_changes', { event: '*', schema: 'public', table: 'schedules' }, payload => {
-                        console.log('Change received!', payload);
-                        calendar.refetchEvents();
-                    })
-                    .subscribe();
-
-                supabase
-                    .channel('realtime_todos')
-                    .on('postgres_changes', { event: '*', schema: 'public', table: 'todos' }, payload => {
-                        console.log('Todo change received!', payload);
-                        renderTodoList();
-                    })
-                    .subscribe();
-            }
-
-        });
-    </script>
+        supabase
+            .channel('realtime_todos')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'todos' }, payload => {
+                console.log('Todo change received!', payload);
+                // 할 일이 변경되면 목록을 다시 렌더링
+                renderTodoList();
+            })
+            .subscribe();
+    });
+</script>
 </body>
 </html>
