@@ -130,9 +130,6 @@ function initializeSchedulePage() {
             return alert('기타 목적을 입력해주세요.');
         }
 
-const checkedPurposes = Array.from(
-    purposeContainer.querySelectorAll('input[type="checkbox"]:checked')
-).map(cb => cb.value);
 
 const newVisit = {
     visit_date: dateInput.value,
@@ -143,7 +140,6 @@ const newVisit = {
     edu_text: eduTypeInput.value.trim() || null,
     other_text: etcPurposeInput.value.trim() || null
 };
-
 
 
         const { error } = await App.supabase.from('visits').insert([newVisit]);
