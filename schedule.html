@@ -35,7 +35,6 @@
     <main class="container schedule-container">
         <section class="main-content">
             <h2 class="page-title">내 일정 확인 및 신규 등록</h2>
-            <!-- schedule.js가 이 div에 캘린더를 렌더링합니다. -->
             <div id="schedule-calendar"></div>
         </section>
 
@@ -53,6 +52,14 @@
                             <option value="">학교를 선택하세요</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label for="period">시간대</label>
+                        <select id="period">
+                            <option value="">전체</option>
+                            <option value="AM">오전</option>
+                            <option value="PM">오후</option>
+                        </select>
+                    </div>
                     <div class="form-group-inline">
                         <div class="form-group">
                             <label for="start-time">시작 시간</label>
@@ -64,8 +71,15 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="purposes">방문 목적</label>
-                        <textarea id="purposes" rows="4" placeholder="예: 위험성평가 컨설팅"></textarea>
+                        <label>방문 목적 (중복 가능)</label>
+                        <div id="purpose-list" class="purpose-list">
+                            <div class="checkbox-group"><input type="checkbox" id="p1" value="위험성평가"><label for="p1">위험성평가</label></div>
+                            <div class="checkbox-group"><input type="checkbox" id="p2" value="컨설팅"><label for="p2">컨설팅</label></div>
+                            <div class="checkbox-group"><input type="checkbox" id="p3" value="교육"><label for="p3">교육</label></div>
+                            <div class="sub-input"><input type="text" id="edu-type" placeholder="교육 종류 (예: 관리감독자 교육)"></div>
+                            <div class="checkbox-group"><input type="checkbox" id="p4" value="기타"><label for="p4">기타</label></div>
+                            <div class="sub-input"><input type="text" id="etc-purpose" placeholder="기타 목적 내용"></div>
+                        </div>
                     </div>
                     
                     <p id="form-message" class="form-message"></p>
@@ -79,7 +93,6 @@
         </aside>
     </main>
 
-    <!-- App-wide & Page-specific scripts -->
     <script src="app.js"></script>
     <script src="schedule.js"></script>
 </body>
