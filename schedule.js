@@ -1,18 +1,18 @@
 // schedule.js - 일정 관리 페이지 스크립트 (인증 기능 제거)
+
 document.addEventListener('DOMContentLoaded', () => {
-    if (!window.App) {
-        console.error('App가 아직 준비되지 않았습니다.');
-        // App이 늦게 붙는 케이스 대비
-        window.addEventListener('load', () => {
-            if (window.App) initializeSchedulePage();
-        });
-        return;
-    }
-    initializeSchedulePage();
+    // app.js가 App 객체를 준비할 시간을 주기 위해 아주 짧게(0.1초) 대기합니다.
+    // 이것으로 대부분의 타이밍 문제를 해결할 수 있습니다.
+    setTimeout(initializeSchedulePage, 100);
 });
 
 function initializeSchedulePage() {
-    console.log('App.SCHOOLS length =', App.SCHOOLS?.length); // 디버그용
+    // App 객체가 준비되었는지 다시 한번 확인하여 안정성을 높입니다.
+    if (!window.App) {
+        console.error("App 객체를 찾을 수 없습니다. app.js가 제대로 로드되었는지 확인하세요.");
+        alert("페이지를 초기화하는 데 실패했습니다. 잠시 후 다시 시도해주세요.");
+        return;
+    }
 
     // DOM 요소 가져오기
     const calendarEl = document.getElementById('schedule-calendar');
@@ -27,19 +27,16 @@ function initializeSchedulePage() {
     const etcPurposeInput = document.getElementById('etc-purpose');
     const formMessageEl = document.getElementById('form-message');
 
-    // 학교 목록 채우기
+    // 학교 목록과 시간 옵션을 채우는 기능
     App.SCHOOLS.forEach(school => {
         schoolSelect.add(new Option(school, school));
     });
 
-    // 시간 필터링 기능
     const applyTimeFilter = () => {
         const filter = periodSelect.value;
         const currentStart = startTimeSelect.value;
         const currentEnd = endTimeSelect.value;
-
-        App.fillTimeOptions(startTimeSelect, endTimeSelect); // app.js의 기능 사용
-
+        App.fillTimeOptions(startTimeSelect, endTimeSelect);
         if (filter) {
             const filterFn = (timeStr) => {
                 const hour = parseInt(timeStr.split(':')[0], 10);
@@ -56,7 +53,6 @@ function initializeSchedulePage() {
         endTimeSelect.value = currentEnd;
     };
 
-    // 시작 시간 선택 시 종료 시간 자동 설정
     periodSelect.addEventListener('change', applyTimeFilter);
     startTimeSelect.addEventListener('change', () => {
         const v = startTimeSelect.value;
@@ -65,16 +61,14 @@ function initializeSchedulePage() {
         m += 30;
         if (m >= 60) { m = 0; h += 1; }
         const targetTime = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-        
         if (Array.from(endTimeSelect.options).some(o => o.value === targetTime)) {
             endTimeSelect.value = targetTime;
         } else {
             endTimeSelect.value = v;
         }
     });
-    applyTimeFilter(); // 페이지 로드 시 초기 실행
+    applyTimeFilter();
 
-    // 방문 목적 선택 시 추가 입력칸 표시
     purposeContainer.addEventListener('change', (e) => {
         if (e.target.type === 'checkbox') {
             const eduCheckbox = document.querySelector('input[value="교육"]');
