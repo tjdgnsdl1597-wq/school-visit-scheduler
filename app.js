@@ -41,7 +41,6 @@ window.App = {
         
         if (error) {
             console.error("일정 조회 중 에러 발생:", error);
-            // 이 부분은 데이터베이스 규칙(RLS) 문제일 가능성이 높습니다.
             alert("일정 데이터를 불러오지 못했습니다. 데이터베이스 설정을 확인하세요.");
             return [];
         }
