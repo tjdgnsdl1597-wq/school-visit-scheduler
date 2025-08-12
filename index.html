@@ -30,24 +30,42 @@
         </nav>
         <div class="search-box">
             <input type="text" placeholder="검색">
-            <div class="user-avatar-icon"></div>
+            <div class="user-avatar-icon" id="userAvatar"></div>
         </div>
     </header>
 
     <main class="container">
         <aside class="sidebar">
             <section class="panel user-panel">
-                <div class="user-photo"></div>
-                <div class="user-info">
-                    <p><strong>영업 담당자</strong></p>
-                    <!-- 이메일 등 사용자 정보는 app.js에서 동적으로 채울 수 있습니다. -->
-                    <p class="email">이메일 정보 로딩 중...</p>
-                    <p>책임자</p>
+                <!-- 로그인 상태일 때 보여지는 정보 -->
+                <div id="userInfo" style="display: none;">
+                    <div class="user-photo"></div>
+                    <div class="user-info-text">
+                        <p><strong>영업 담당자</strong></p>
+                        <p class="email">이메일 정보 로딩 중...</p>
+                        <p>책임자</p>
+                    </div>
+                    <button id="logoutBtn" class="btn-secondary">로그아웃</button>
+                </div>
+
+                <!-- 로그아웃 상태일 때 보여지는 폼 -->
+                <div id="sidebarLoginForm" style="display: none;">
+                    <h3 class="panel-title">로그인</h3>
+                    <form id="loginFormSidebar">
+                        <div class="form-group">
+                            <input type="email" id="sidebar-email" placeholder="이메일" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" id="sidebar-password" placeholder="비밀번호" required>
+                        </div>
+                        <p id="sidebar-error-message" class="error-message" style="margin-top:0; margin-bottom: 15px;"></p>
+                        <button type="submit" class="btn-primary">로그인</button>
+                        <a href="login.html" class="sub-link">또는 회원가입</a>
+                    </form>
                 </div>
             </section>
             <section class="panel todo-panel">
                 <div class="panel-title">미확인 업무</div>
-                <!-- home.js가 이 div에 미확인 업무 목록을 채웁니다. -->
                 <div class="todo-list">
                     <div class="empty-message">업무 목록 로딩 중...</div>
                 </div>
@@ -55,7 +73,6 @@
         </aside>
 
         <section class="main-content">
-            <!-- home.js가 이 div에 캘린더를 렌더링합니다. -->
             <div id="calendar"></div>
             <div class="widget-container">
                 <div class="panel widget">
@@ -74,9 +91,623 @@
         </section>
     </main>
 
-    <!-- App-wide scripts -->
     <script src="app.js"></script>
-    <!-- Page-specific scripts -->
     <script src="home.js"></script>
 </body>
 </html>
+```
+
+### 2. `app.js` (수정된 코드)
+
+`handleAuth` 함수를 수정하여, 로그인 상태에 따라 프로필 정보 또는 사이드바 로그인 폼을 표시하도록 변경했습니다.
+
+
+```javascript
+// app.js - 전역 애플리케이션 관리
+
+window.App = {
+    supabase: supabase.createClient(
+        "https://harsxljqcnyfgsueiwvq.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhcnN4bGpxY255ZmdzdWVpd3ZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NDQ2OTYsImV4cCI6MjA3MDUyMDY5Nn0.jyXqWN_IwNagbxXCikO2dJxvegWS0Wblo79rb87f2Rg"
+    ),
+    user: null,
+    
+    SCHOOLS: [
+        "숭덕여자중학교", "숭덕여자고등학교", "인천예림학교", "간석여자중학교", "삼산유치원",
+        "인천초은중학교", "인천루원중학교", "인천가석초등학교", "상정중학교", "제물포중학교",
+        "가좌중학교", "인천건지초등학교", "가림고등학교", "인천대정초등학교", "재능대학교 송림캠퍼스부속유치원",
+        "인천소방고등학교", "인성여자중학교", "인천신흥초등학교", "인천송림초등학교", "인천예일고등학교",
+        "인천양촌중학교", "임학중학교", "인천안남초등학교", "인천안남중학교", "계산공업고등학교",
+        "경인교육대학교부설초등학교", "인천효성동초등학교", "명현중학교", "인천미송유치원",
+        "칼빈매니토바국제학교", "영흥초등학교(분기)", "덕적초중고등학교(분기)"
+    ],
+
+    fillTimeOptions: (startSelectEl, endSelectEl) => {
+        if (!startSelectEl || !endSelectEl) return;
+        startSelectEl.innerHTML = "";
+        endSelectEl.innerHTML = "";
+        for (let h = 8; h <= 17; h++) {
+            for (let m = 0; m < 60; m += 30) {
+                const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+                startSelectEl.add(new Option(timeStr, timeStr));
+                endSelectEl.add(new Option(timeStr, timeStr));
+            }
+        }
+    },
+
+    fetchMyVisits: async (rangeStart = null, rangeEnd = null) => {
+        if (!App.user) return [];
+        let query = App.supabase.from('visits').select('*').eq('user_id', App.user.id);
+        if (rangeStart) query = query.gte('visit_date', rangeStart);
+        if (rangeEnd) query = query.lte('visit_date', rangeEnd);
+        const { data, error } = await query.order('visit_date', { ascending: true });
+        if (error) {
+            console.error("일정 조회 중 에러 발생:", error);
+            return [];
+        }
+        return data || [];
+    },
+
+    handleAuth: async () => {
+        const { data: { session } } = await App.supabase.auth.getSession();
+        App.user = session?.user || null;
+
+        // 로그인 페이지에서는 UI 업데이트 로직을 실행하지 않음
+        if (location.pathname.includes('login.html')) {
+            return;
+        }
+        
+        App.updateUserInfoUI();
+        App.attachSidebarLoginForm();
+    },
+    
+    updateUserInfoUI: () => {
+        const userInfoEl = document.getElementById('userInfo');
+        const sidebarLoginFormEl = document.getElementById('sidebarLoginForm');
+        
+        if (!userInfoEl || !sidebarLoginFormEl) return;
+
+        if (App.user) {
+            // 로그인 상태 UI
+            userInfoEl.style.display = 'block';
+            sidebarLoginFormEl.style.display = 'none';
+
+            const userEmailEl = userInfoEl.querySelector('.email');
+            if (userEmailEl) userEmailEl.textContent = App.user.email;
+
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.onclick = async () => {
+                    await App.supabase.auth.signOut();
+                    location.reload();
+                };
+            }
+        } else {
+            // 로그아웃 상태 UI
+            userInfoEl.style.display = 'none';
+            sidebarLoginFormEl.style.display = 'block';
+        }
+    },
+
+    attachSidebarLoginForm: () => {
+        const form = document.getElementById('loginFormSidebar');
+        if (!form) return;
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('sidebar-email').value;
+            const password = document.getElementById('sidebar-password').value;
+            const errorMessageEl = document.getElementById('sidebar-error-message');
+            
+            errorMessageEl.style.display = 'none';
+
+            const { error } = await App.supabase.auth.signInWithPassword({ email, password });
+
+            if (error) {
+                errorMessageEl.textContent = "로그인 실패. 정보를 확인하세요.";
+                errorMessageEl.style.display = 'block';
+                return;
+            }
+            location.reload();
+        };
+    }
+};
+
+document.addEventListener('DOMContentLoaded', App.handleAuth);
+```
+
+### 3. `style.css` (추가할 코드)
+
+사이드바 로그인 폼의 디자인을 위해 아래 코드를 **기존 `style.css` 파일의 맨 아래에 추가**해주세요.
+
+
+```css
+/* Google Fonts Import */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+/* CSS Variables for easy theme management */
+:root {
+    --bg-color: #f0f2f5;
+    --panel-color: #ffffff;
+    --text-color: #333;
+    --primary-color: #004aad;
+    --secondary-color: #555;
+    --border-color: #e0e0e0;
+    --header-bg: #fff;
+    --active-nav-bg: #e6f7ff;
+    --year-color: #2e7d32;
+    --font-family: 'Noto Sans KR', sans-serif;
+}
+
+/* Global Resets and Base Styles */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.6;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* Header & Navigation */
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    height: 64px;
+    background-color: var(--header-bg);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+}
+
+.brand .logo {
+    width: 32px;
+    height: 32px;
+    background-color: #ccc; /* Placeholder for logo */
+    border-radius: 4px;
+    margin-right: 12px;
+}
+
+.brand h1 {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.nav {
+    display: flex;
+    gap: 8px;
+}
+
+.nav a {
+    padding: 8px 16px;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.nav a:hover {
+    background-color: var(--active-nav-bg);
+    color: var(--primary-color);
+}
+
+.nav a.active {
+    background-color: var(--primary-color);
+    color: #fff;
+    font-weight: 700;
+}
+
+.nav a.disabled {
+    color: #aaa;
+    cursor: not-allowed;
+}
+
+.search-box {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.search-box input {
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 8px 12px;
+    width: 200px;
+}
+
+.search-box .user-avatar-icon {
+    width: 36px;
+    height: 36px;
+    background-color: var(--primary-color);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+
+/* Main Layout */
+.container {
+    display: flex;
+    gap: 24px;
+    padding: 24px;
+    max-width: 1600px;
+    margin: 0 auto;
+    align-items: flex-start;
+}
+
+.sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.main-content {
+    flex-grow: 1;
+}
+
+.panel {
+    background-color: var(--panel-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.panel-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 12px;
+}
+
+/* Sidebar Widgets */
+.user-panel {
+    text-align: center;
+}
+
+.user-photo {
+    width: 100px;
+    height: 100px;
+    background: #eee url(https://i.pravatar.cc/100) center/cover; /* Placeholder image */
+    border-radius: 50%;
+    margin: 0 auto 16px;
+    border: 3px solid var(--primary-color);
+}
+
+.user-info-text p {
+    margin-bottom: 4px;
+    font-size: 14px;
+}
+.user-info-text .email {
+    font-size: 12px;
+    color: #777;
+    word-break: break-all;
+}
+
+#logoutBtn {
+    width: 100%;
+    margin-top: 16px;
+    padding: 10px;
+    font-weight: 500;
+}
+
+.todo-list .empty-message,
+.todo-list .error-message {
+    font-size: 14px;
+    color: #888;
+}
+.todo-list .todo-item {
+    font-size: 14px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+.todo-list .todo-item:last-child {
+    border-bottom: none;
+}
+
+/* Main Content Widgets */
+.widget-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+    margin-top: 24px;
+}
+
+.widget textarea {
+    width: 100%;
+    height: 120px;
+    resize: none;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 8px;
+    font-family: var(--font-family);
+}
+.widget .widget-content {
+    color: #888;
+}
+
+/* FullCalendar Customizations */
+#calendar, #schedule-calendar {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.fc .fc-toolbar-title {
+    font-size: 32px !important;
+    font-weight: 700 !important;
+    color: var(--year-color) !important;
+}
+.fc-daygrid-day-number {
+    font-size: 14px;
+}
+.fc .fc-col-header-cell-cushion {
+    font-size: 14px;
+    font-weight: 500;
+}
+.fc .fc-event {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* =================================== */
+/* ===== Login Page Styles =========== */
+/* =================================== */
+
+.auth-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: var(--bg-color);
+}
+
+.auth-container {
+    max-width: 420px;
+    width: 100%;
+    padding: 20px;
+}
+
+.auth-card {
+    background-color: var(--panel-color);
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border: 1px solid var(--border-color);
+}
+
+.auth-card .brand {
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+.auth-card .brand h1 {
+    font-size: 20px;
+}
+
+.auth-subtitle {
+    text-align: center;
+    color: var(--secondary-color);
+    margin-bottom: 24px;
+}
+
+#loginForm .form-group {
+    margin-bottom: 20px;
+}
+
+#loginForm .form-group label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+#loginForm .form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+#loginForm .form-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+#loginForm .form-actions button {
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.error-message, .success-message {
+    font-size: 14px;
+    color: #d9534f; /* Red for errors */
+    text-align: center;
+    margin-top: 16px;
+    padding: 10px;
+    border-radius: 4px;
+    background-color: #f2dede;
+    display: none; /* Initially hidden */
+}
+
+.success-message {
+    color: #3c763d; /* Green for success */
+    background-color: #dff0d8;
+}
+
+
+.auth-footer {
+    text-align: center;
+    font-size: 12px;
+    color: #888;
+    margin-top: 24px;
+}
+
+/* =================================== */
+/* ===== Schedule Page Styles ======== */
+/* =================================== */
+
+.schedule-container {
+    align-items: flex-start;
+}
+.schedule-sidebar {
+    width: 380px; /* 폼 영역 너비 조정 */
+    flex-shrink: 0;
+}
+.page-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 24px;
+}
+#schedule-form .form-group,
+#sidebarLoginForm .form-group {
+    margin-bottom: 15px;
+}
+#schedule-form .form-group-inline {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+#schedule-form .form-group-inline .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+#schedule-form label,
+#sidebarLoginForm label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+#schedule-form input, 
+#schedule-form select, 
+#schedule-form textarea,
+#sidebarLoginForm input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: var(--font-family);
+}
+#schedule-form .form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+#schedule-form .form-actions button {
+    flex-grow: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.btn-primary {
+    background-color: var(--primary-color);
+    color: #fff;
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.btn-secondary {
+    background-color: #f0f0f0;
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+.form-message {
+    font-size: 14px;
+    text-align: center;
+    margin-top: 16px;
+    padding: 10px;
+    border-radius: 4px;
+    display: none; /* Initially hidden */
+}
+.form-message.error {
+    color: #d9534f;
+    background-color: #f2dede;
+}
+.form-message.success {
+    color: #3c763d;
+    background-color: #dff0d8;
+}
+
+/* =================================== */
+/* ===== Schedule Page Additions ===== */
+/* =================================== */
+
+.purpose-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.purpose-list .checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.purpose-list .checkbox-group input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+}
+
+.purpose-list .sub-input {
+    padding-left: 24px;
+    display: none; /* Initially hidden */
+}
+
+.purpose-list .sub-input input {
+    width: 100%;
+    padding: 8px;
+    font-size: 13px;
+    background-color: #f9f9f9;
+}
+
+/* =================================== */
+/* ===== Sidebar Login Form Styles === */
+/* =================================== */
+#sidebarLoginForm .form-group input {
+    padding: 8px;
+    font-size: 13px;
+}
+#sidebarLoginForm .sub-link {
+    display: block;
+    text-align: center;
+    font-size: 12px;
+    color: var(--secondary-color);
+    margin-top: 15px;
+    text-decoration: underline;
+}
