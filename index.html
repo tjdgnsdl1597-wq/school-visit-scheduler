@@ -1,41 +1,88 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>학교 방문 일정 예약</title>
-    <link rel="stylesheet" href="style.css" />
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>학교 방문 일정 예약</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>학교 방문 일정 예약</h1>
-    <form id="visitForm">
-        <label>방문일시: <input type="date" id="visitDate" required /></label><br />
-        <label>방문 시작 시간: <select id="startTime"></select></label>
-        <label>방문 종료 시간: <select id="endTime"></select></label><br />
-        <fieldset id="purposeList">
-            <legend>방문 용건</legend>
-            <label><input type="checkbox" value="월점검" />월점검</label>
-            <label><input type="checkbox" value="위험성평가" />위험성평가</label>
-            <label><input type="checkbox" value="근골조사" />근골조사</label>
-            <label><input type="checkbox" value="교육" />교육</label>
-            <label><input type="checkbox" value="산재조사" />산재조사</label>
-            <label><input type="checkbox" value="기타" />기타</label>
-        </fieldset>
-        <input type="text" id="etcPurpose" placeholder="기타 용건 입력" style="display:none;" /><br />
-        <label>교육 종류: <input type="text" id="eduType" /></label><br />
-        <label>학교 선택: <select id="schoolSelect"></select></label><br />
-        <button type="submit">저장</button>
-    </form>
+  <div class="wrap">
+    <div class="topbar">
+      <h1>학교 방문 일정 예약</h1>
+      <div>
+        <button id="loginBtn" class="ghost">로그인</button>
+        <button id="logoutBtn" class="ghost" style="display:none">로그아웃</button>
+      </div>
+    </div>
 
-    <h2>일정 목록</h2>
-    <ul id="visitList"></ul>
+    <div class="card">
+      <form id="visitForm" autocomplete="off">
+        <label>방문일시</label>
+        <input type="date" id="visitDate" required />
 
-    <h2>캘린더</h2>
-    <div id="calendar"></div>
+        <div class="row">
+          <div>
+            <label>구분</label>
+            <select id="period">
+              <option value="">전체</option>
+              <option value="AM">오전</option>
+              <option value="PM">오후</option>
+            </select>
+          </div>
+          <div></div>
+        </div>
 
-    <script src="script.js"></script>
+        <div class="row">
+          <div>
+            <label>시작시간</label>
+            <select id="startTime" required></select>
+          </div>
+          <div>
+            <label>종료시간</label>
+            <select id="endTime" required></select>
+          </div>
+        </div>
+        <p class="hint">시간은 08:00 ~ 17:00, 30분 단위</p>
+
+        <label style="margin-top:14px;">방문 용건 (복수 선택)</label>
+        <div id="purposeList" class="grid-check">
+          <label class="pill"><input type="checkbox" value="월점검"> 월점검</label>
+          <label class="pill"><input type="checkbox" value="위험성평가"> 위험성평가</label>
+          <label class="pill"><input type="checkbox" value="근골조사"> 근골조사</label>
+          <label class="pill"><input type="checkbox" value="산재조사"> 산재조사</label>
+          <label class="pill"><input type="checkbox" value="교육"> 교육</label>
+          <label class="pill"><input type="checkbox" value="기타"> 기타</label>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>교육 선택 시 종류</label>
+            <input type="text" id="eduType" placeholder="예: 근골교육 / 위험성평가 교육 / 정기교육">
+          </div>
+          <div>
+            <label>기타 선택 시 내용</label>
+            <input type="text" id="etcPurpose" placeholder="기타 방문 내용">
+          </div>
+        </div>
+
+        <label style="margin-top:14px;">학교 선택</label>
+        <select id="schoolSelect" required></select>
+
+        <button class="primary" type="submit">저장</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2 class="h2">내 일정 캘린더</h2>
+      <div id="calendar"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/locales-all.global.min.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
