@@ -1,9 +1,15 @@
 // schedule.js - 일정 관리 페이지 스크립트 (인증 기능 제거)
 
+// [수정] DOM이 로드되면 먼저 App 객체가 있는지 확인합니다.
 document.addEventListener('DOMContentLoaded', () => {
-    // app.js가 App 객체를 준비할 시간을 주기 위해 아주 짧게(0.1초) 대기합니다.
-    // 이것으로 대부분의 타이밍 문제를 해결할 수 있습니다.
-    setTimeout(initializeSchedulePage, 100);
+    if (window.App) {
+        // App이 이미 준비되었다면 바로 실행
+        initializeSchedulePage();
+    } else {
+        // App이 아직 없다면, 페이지의 모든 리소스(이미지, 스크립트 등)가
+        // 완전히 로드된 후에 실행하도록 예약합니다. 이것이 가장 안정적인 방법입니다.
+        window.addEventListener('load', initializeSchedulePage);
+    }
 });
 
 function initializeSchedulePage() {
