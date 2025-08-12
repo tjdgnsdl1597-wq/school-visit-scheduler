@@ -168,14 +168,21 @@ a {
     border: 3px solid var(--primary-color);
 }
 
-.user-info p {
+.user-info-text p {
     margin-bottom: 4px;
     font-size: 14px;
 }
-.user-info .email {
+.user-info-text .email {
     font-size: 12px;
     color: #777;
     word-break: break-all;
+}
+
+#logoutBtn {
+    width: 100%;
+    margin-top: 16px;
+    padding: 10px;
+    font-weight: 500;
 }
 
 .todo-list .empty-message,
@@ -354,8 +361,9 @@ a {
     font-weight: 700;
     margin-bottom: 24px;
 }
-#schedule-form .form-group {
-    margin-bottom: 20px;
+#schedule-form .form-group,
+#sidebarLoginForm .form-group {
+    margin-bottom: 15px;
 }
 #schedule-form .form-group-inline {
     display: flex;
@@ -366,14 +374,16 @@ a {
     flex: 1;
     margin-bottom: 0;
 }
-#schedule-form label {
+#schedule-form label,
+#sidebarLoginForm label {
     display: block;
     font-weight: 500;
     margin-bottom: 8px;
 }
 #schedule-form input, 
 #schedule-form select, 
-#schedule-form textarea {
+#schedule-form textarea,
+#sidebarLoginForm input {
     width: 100%;
     padding: 10px;
     border: 1px solid var(--border-color);
@@ -399,6 +409,13 @@ a {
 .btn-primary {
     background-color: var(--primary-color);
     color: #fff;
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
 }
 .btn-secondary {
     background-color: #f0f0f0;
@@ -453,4 +470,20 @@ a {
     padding: 8px;
     font-size: 13px;
     background-color: #f9f9f9;
+}
+
+/* =================================== */
+/* ===== Sidebar Login Form Styles === */
+/* =================================== */
+#sidebarLoginForm .form-group input {
+    padding: 8px;
+    font-size: 13px;
+}
+#sidebarLoginForm .sub-link {
+    display: block;
+    text-align: center;
+    font-size: 12px;
+    color: var(--secondary-color);
+    margin-top: 15px;
+    text-decoration: underline;
 }
