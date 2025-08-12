@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initializeSchedulePage() {
+    // DOM 요소 가져오기
     const calendarEl = document.getElementById('schedule-calendar');
     const form = document.getElementById('schedule-form');
     const dateInput = document.getElementById('visit-date');
@@ -17,27 +18,25 @@ function initializeSchedulePage() {
     const etcPurposeInput = document.getElementById('etc-purpose');
     const formMessageEl = document.getElementById('form-message');
 
+    // [수정] 학교 목록과 시간 옵션을 채우는 기능 복구
     // 학교 목록 채우기
     App.SCHOOLS.forEach(school => {
         schoolSelect.add(new Option(school, school));
     });
 
-    // [수정] 시간 필터링 기능 복구
+    // 시간 필터링 기능
     const applyTimeFilter = () => {
-        const filter = periodSelect.value; // 'AM', 'PM', ''
+        const filter = periodSelect.value;
         const currentStart = startTimeSelect.value;
         const currentEnd = endTimeSelect.value;
 
-        // 먼저 전체 시간 옵션을 채웁니다.
-        App.fillTimeOptions(startTimeSelect, endTimeSelect);
+        App.fillTimeOptions(startTimeSelect, endTimeSelect); // app.js의 기능 사용
 
-        // 필터링이 필요한 경우 옵션을 제거합니다.
         if (filter) {
             const filterFn = (timeStr) => {
                 const hour = parseInt(timeStr.split(':')[0], 10);
                 return filter === 'AM' ? hour < 12 : hour >= 12;
             };
-
             Array.from(startTimeSelect.options).forEach(opt => {
                 if (opt.value && !filterFn(opt.value)) opt.remove();
             });
@@ -45,13 +44,11 @@ function initializeSchedulePage() {
                 if (opt.value && !filterFn(opt.value)) opt.remove();
             });
         }
-        
-        // 이전 선택값 유지
         startTimeSelect.value = currentStart;
         endTimeSelect.value = currentEnd;
     };
 
-    // [수정] 시작 시간 선택 시 종료 시간 자동 설정 기능 복구
+    // 시작 시간 선택 시 종료 시간 자동 설정
     periodSelect.addEventListener('change', applyTimeFilter);
     startTimeSelect.addEventListener('change', () => {
         const v = startTimeSelect.value;
@@ -69,7 +66,7 @@ function initializeSchedulePage() {
     });
     applyTimeFilter(); // 페이지 로드 시 초기 실행
 
-    // [수정] 방문 목적 선택 시 추가 입력칸 표시 기능 복구
+    // 방문 목적 선택 시 추가 입력칸 표시
     purposeContainer.addEventListener('change', (e) => {
         if (e.target.type === 'checkbox') {
             const eduCheckbox = document.querySelector('input[value="교육"]');
