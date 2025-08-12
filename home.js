@@ -1,88 +1,81 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방문 일정 대시보드</title>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
-    <!-- Custom Stylesheet -->
-    <link rel="stylesheet" href="style.css">
-    <!-- FullCalendar JS -->
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
-    <!-- Supabase JS -->
-    <script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-</head>
-<body>
-    <header class="topbar">
-        <div class="brand">
-            <div class="logo"></div>
-            <h1>인천광역시학교안전공제회 산업안전팀</h1>
-        </div>
-        <nav class="nav">
-            <a href="index.html">학교정리</a>
-            <a href="schedule.html">일정관리</a>
-            <a href="#" class="active">업무관리</a>
-            <a href="#" class="disabled">교육자료</a>
-            <a href="#" class="disabled">안전보건표지</a>
-        </nav>
-        <div class="search-box">
-            <input type="text" placeholder="검색">
-            <button class="search-btn"></button>
-        </div>
-    </header>
+// home.js - 메인 페이지 대시보드 스크립트 (인증 기능 제거)
 
-    <main class="container">
-        <aside class="sidebar">
-            <section class="panel user-panel">
-                 <div class="user-photo" style="background-image: url('https://i.pravatar.cc/100?u=kang');"></div>
-                 <h2 class="user-name">대리 강성훈</h2>
-                 <div class="user-details">
-                    <p>입사 : 25.03.17(00일차)</p>
-                    <p>특징 : 노는거 좋아함</p>
-                 </div>
-            </section>
-            <section class="panel todo-panel">
-                <h3 class="panel-title">미완료업무</h3>
-                <div class="todo-list">
-                    <div class="empty-message">업무 목록 로딩 중...</div>
-                </div>
-            </section>
-        </aside>
+document.addEventListener('DOMContentLoaded', () => {
+    initializeDashboard();
+});
 
-        <section class="main-content">
-            <div class="calendar-header">
-                <div class="calendar-title">
-                    <span class="year">2025</span>
-                    <h2 class="month">8월</h2>
-                </div>
-                <!-- [수정] 이전/다음 버튼 추가 -->
-                <div class="calendar-controls">
-                    <button id="calendar-prev">‹</button>
-                    <button id="calendar-next">›</button>
-                </div>
-            </div>
-            <div id="calendar"></div>
-            <div class="widget-container">
-                <div class="panel widget">
-                    <h3 class="panel-title">메모사항</h3>
-                    <textarea></textarea>
-                </div>
-                <div class="panel widget">
-                    <h3 class="panel-title">학교 산업재해</h3>
-                    <div class="widget-content"></div>
-                </div>
-                <div class="panel widget">
-                    <h3 class="panel-title">노동부 산재알리미</h3>
-                    <div class="widget-content"></div>
-                </div>
-            </div>
-        </section>
-    </main>
+function initializeDashboard() {
+    const calendarEl = document.getElementById('calendar');
+    const todoListEl = document.querySelector('.todo-list');
+    const yearEl = document.querySelector('.calendar-header .year');
+    const monthEl = document.querySelector('.calendar-header .month');
+    const prevBtn = document.getElementById('calendar-prev');
+    const nextBtn = document.getElementById('calendar-next');
 
-    <script src="app.js"></script>
-    <script src="home.js"></script>
-</body>
-</html>
+    if (!calendarEl) {
+        console.error("캘린더 요소를 찾을 수 없습니다.");
+        return;
+    }
+
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+        locale: 'ko',
+        initialView: 'dayGridMonth',
+        height: 'auto',
+        datesSet: (dateInfo) => {
+            const currentDate = dateInfo.view.currentStart;
+            if(yearEl) yearEl.textContent = currentDate.getFullYear();
+            if(monthEl) monthEl.textContent = `${currentDate.getMonth() + 1}월`;
+        },
+        events: async (fetchInfo, successCallback, failureCallback) => {
+            try {
+                const visits = await App.fetchAllVisits(
+                    fetchInfo.start.toISOString().slice(0, 10),
+                    fetchInfo.end.toISOString().slice(0, 10)
+                );
+                const events = visits.map(visit => ({
+                    id: visit.id,
+                    title: `${visit.school}`,
+                    start: visit.visit_date,
+                    allDay: true
+                }));
+                successCallback(events);
+            } catch (error) {
+                failureCallback(error);
+            }
+        }
+    });
+    calendar.render();
+
+    prevBtn.addEventListener('click', () => calendar.prev());
+    nextBtn.addEventListener('click', () => calendar.next());
+
+    async function renderOverdueTasks() {
+        try {
+            const today = new Date().toISOString().slice(0, 10);
+            const allVisits = await App.fetchAllVisits();
+            const overdueTasks = allVisits.filter(visit => visit.visit_date < today).slice(-6);
+
+            todoListEl.innerHTML = "";
+            if (overdueTasks.length === 0) {
+                todoListEl.innerHTML = `<div class="empty-message">미완료 업무가 없습니다.</div>`;
+            } else {
+                overdueTasks.forEach(task => {
+                    const li = document.createElement('div');
+                    li.className = 'todo-item';
+                    li.textContent = `${task.visit_date} - ${task.school}`;
+                    todoListEl.appendChild(li);
+                });
+            }
+        } catch (error) {
+            console.error("미완료 업무 로딩 실패:", error);
+        }
+    }
+    renderOverdueTasks();
+
+    App.supabase.channel('public:visits')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'visits' }, () => {
+          calendar.refetchEvents();
+          renderOverdueTasks();
+      })
+      .subscribe();
+}
