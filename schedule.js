@@ -1,10 +1,19 @@
 // schedule.js - 일정 관리 페이지 스크립트 (인증 기능 제거)
-
 document.addEventListener('DOMContentLoaded', () => {
+    if (!window.App) {
+        console.error('App가 아직 준비되지 않았습니다.');
+        // App이 늦게 붙는 케이스 대비
+        window.addEventListener('load', () => {
+            if (window.App) initializeSchedulePage();
+        });
+        return;
+    }
     initializeSchedulePage();
 });
 
 function initializeSchedulePage() {
+    console.log('App.SCHOOLS length =', App.SCHOOLS?.length); // 디버그용
+
     // DOM 요소 가져오기
     const calendarEl = document.getElementById('schedule-calendar');
     const form = document.getElementById('schedule-form');
@@ -18,7 +27,6 @@ function initializeSchedulePage() {
     const etcPurposeInput = document.getElementById('etc-purpose');
     const formMessageEl = document.getElementById('form-message');
 
-    // [수정] 학교 목록과 시간 옵션을 채우는 기능 복구
     // 학교 목록 채우기
     App.SCHOOLS.forEach(school => {
         schoolSelect.add(new Option(school, school));
