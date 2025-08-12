@@ -214,7 +214,7 @@ a {
 }
 
 /* FullCalendar Customizations */
-#calendar {
+#calendar, #schedule-calendar {
     background-color: #fff;
     padding: 20px;
     border-radius: 8px;
@@ -236,4 +236,221 @@ a {
 .fc .fc-event {
     background-color: var(--primary-color);
     border-color: var(--primary-color);
+}
+
+/* =================================== */
+/* ===== Login Page Styles =========== */
+/* =================================== */
+
+.auth-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: var(--bg-color);
+}
+
+.auth-container {
+    max-width: 420px;
+    width: 100%;
+    padding: 20px;
+}
+
+.auth-card {
+    background-color: var(--panel-color);
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border: 1px solid var(--border-color);
+}
+
+.auth-card .brand {
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+.auth-card .brand h1 {
+    font-size: 20px;
+}
+
+.auth-subtitle {
+    text-align: center;
+    color: var(--secondary-color);
+    margin-bottom: 24px;
+}
+
+#loginForm .form-group {
+    margin-bottom: 20px;
+}
+
+#loginForm .form-group label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+#loginForm .form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+#loginForm .form-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+#loginForm .form-actions button {
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.error-message, .success-message {
+    font-size: 14px;
+    color: #d9534f; /* Red for errors */
+    text-align: center;
+    margin-top: 16px;
+    padding: 10px;
+    border-radius: 4px;
+    background-color: #f2dede;
+    display: none; /* Initially hidden */
+}
+
+.success-message {
+    color: #3c763d; /* Green for success */
+    background-color: #dff0d8;
+}
+
+
+.auth-footer {
+    text-align: center;
+    font-size: 12px;
+    color: #888;
+    margin-top: 24px;
+}
+
+/* =================================== */
+/* ===== Schedule Page Styles ======== */
+/* =================================== */
+
+.schedule-container {
+    align-items: flex-start;
+}
+.schedule-sidebar {
+    width: 380px; /* 폼 영역 너비 조정 */
+    flex-shrink: 0;
+}
+.page-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 24px;
+}
+#schedule-form .form-group {
+    margin-bottom: 20px;
+}
+#schedule-form .form-group-inline {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+#schedule-form .form-group-inline .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+#schedule-form label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+#schedule-form input, 
+#schedule-form select, 
+#schedule-form textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: var(--font-family);
+}
+#schedule-form .form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+#schedule-form .form-actions button {
+    flex-grow: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.btn-primary {
+    background-color: var(--primary-color);
+    color: #fff;
+}
+.btn-secondary {
+    background-color: #f0f0f0;
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+.form-message {
+    font-size: 14px;
+    text-align: center;
+    margin-top: 16px;
+    padding: 10px;
+    border-radius: 4px;
+    display: none; /* Initially hidden */
+}
+.form-message.error {
+    color: #d9534f;
+    background-color: #f2dede;
+}
+.form-message.success {
+    color: #3c763d;
+    background-color: #dff0d8;
+}
+
+/* =================================== */
+/* ===== Schedule Page Additions ===== */
+/* =================================== */
+
+.purpose-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.purpose-list .checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.purpose-list .checkbox-group input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+}
+
+.purpose-list .sub-input {
+    padding-left: 24px;
+    display: none; /* Initially hidden */
+}
+
+.purpose-list .sub-input input {
+    width: 100%;
+    padding: 8px;
+    font-size: 13px;
+    background-color: #f9f9f9;
 }
