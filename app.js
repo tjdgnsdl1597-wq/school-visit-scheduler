@@ -3,7 +3,7 @@
 window.App = {
     supabase: supabase.createClient(
         "https://harsxljqcnyfgsueiwvq.supabase.co",
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhcnN4bGpxY255ZmdzdWVpd3ZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NDQ2OTYsImV4cCI6MjA3MDUyMDY5Nn0.jyXqWN_IwNagbxXCikO2dJxvegWS0Wblo79rb87f2Rg"
+        "eyJhbGciOiJIJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhcnN4bGpxY255ZmdzdWVpd3ZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NDQ2OTYsImV4cCI6MjA3MDUyMDY5Nn0.jyXqWN_IwNagbxXCikO2dJxvegWS0Wblo79rb87f2Rg"
     ),
     user: null, // 로그인한 사용자 정보를 저장할 변수
     
@@ -31,7 +31,7 @@ window.App = {
     },
 
     fetchMyVisits: async (rangeStart = null, rangeEnd = null) => {
-        if (!App.user) return []; // 로그인 안했으면 빈 배열 반환
+        if (!App.user) return [];
         let query = App.supabase.from('visits').select('*').eq('user_id', App.user.id);
         if (rangeStart) query = query.gte('visit_date', rangeStart);
         if (rangeEnd) query = query.lte('visit_date', rangeEnd);
@@ -52,16 +52,19 @@ window.App = {
         App.updateMainUI();
     },
     
-    // [수정] 로그인 상태에 따라 UI를 제어하는 함수
     updateMainUI: () => {
-        const loginSectionEl = document.getElementById('sidebar-login-section');
+        // [수정] index.html에 맞는 정확한 ID로 요소를 찾습니다.
+        const loginPanelEl = document.getElementById('login-panel');
         const logoutBtn = document.getElementById('logoutBtn');
         
-        if (!loginSectionEl || !logoutBtn) return;
+        if (!loginPanelEl || !logoutBtn) {
+            console.error("UI 요소를 찾을 수 없습니다: #login-panel 또는 #logoutBtn");
+            return;
+        }
 
         if (App.user) {
-            // 로그인 상태: 로그인 폼 숨기고, 로그아웃 버튼 표시
-            loginSectionEl.style.display = 'none';
+            // 로그인 상태: 로그인 패널 숨기고, 로그아웃 버튼 표시
+            loginPanelEl.style.display = 'none';
             logoutBtn.style.display = 'block';
 
             logoutBtn.onclick = async () => {
@@ -70,8 +73,8 @@ window.App = {
             };
 
         } else {
-            // 로그아웃 상태: 로그인 폼 표시, 로그아웃 버튼 숨김
-            loginSectionEl.style.display = 'block';
+            // 로그아웃 상태: 로그인 패널 표시, 로그아웃 버튼 숨김
+            loginPanelEl.style.display = 'block';
             logoutBtn.style.display = 'none';
         }
         
