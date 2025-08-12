@@ -99,15 +99,17 @@
   </main>
 
   <!-- ===== JS 로드 순서 중요! body 끝에서 한 번만 ===== -->
-  <!-- FullCalendar 먼저 -->
+   <!-- FullCalendar 먼저 -->
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.11/locales/ko.global.min.js"></script>
 
   <!-- Supabase UMD 다음 -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 
-  <!-- 전역 App, 그다음 페이지 스크립트 -->
+  <!-- 전역 App (Supabase가 로드된 뒤에 실행) -->
   <script src="app.js"></script>
+
+  <!-- 페이지 스크립트 마지막 -->
   <script src="schedule.js"></script>
 </body>
 </html>
