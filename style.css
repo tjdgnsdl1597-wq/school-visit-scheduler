@@ -532,3 +532,35 @@ a {
     margin-top: 15px;
     text-decoration: underline;
 }
+/* =================================== */
+/* ===== Sidebar Login Form Styles === */
+/* =================================== */
+
+#sidebar-login-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px solid var(--panel-border-color);
+}
+
+#sidebar-login-section .form-group {
+    margin-bottom: 10px;
+}
+
+#sidebar-login-section input {
+    width: 100%;
+    padding: 8px;
+    font-size: 13px;
+    border: 1px solid #ccc;
+    border-radius: 4px; /* Optional: for rounded corners */
+}
+
+#sidebar-login-section .btn-primary {
+    padding: 10px;
+}
+
+#logoutBtn {
+    width: 100%;
+    margin-top: 20px;
+    padding: 10px;
+    font-weight: 500;
+}
