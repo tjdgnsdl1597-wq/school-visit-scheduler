@@ -1,8 +1,5 @@
 // app.js - 전역 애플리케이션 관리
 
-// 1. 전역 네임스페이스 생성 및 Supabase 클라이언트 초기화
-// - window.App 객체를 만들어 모든 공통 기능과 데이터를 담아 관리합니다.
-// - 이렇게 하면 window 객체를 직접 오염시키지 않아 코드 충돌을 방지할 수 있습니다.
 window.App = {
     supabase: supabase.createClient(
         "https://harsxljqcnyfgsueiwvq.supabase.co",
@@ -10,7 +7,7 @@ window.App = {
     ),
     user: null, // 로그인한 사용자 정보를 저장할 변수
     
-    // 2. 공통 데이터
+    // 공통 데이터
     SCHOOLS: [
         "숭덕여자중학교", "숭덕여자고등학교", "인천예림학교", "간석여자중학교", "삼산유치원",
         "인천초은중학교", "인천루원중학교", "인천가석초등학교", "상정중학교", "제물포중학교",
@@ -21,12 +18,7 @@ window.App = {
         "칼빈매니토바국제학교", "영흥초등학교(분기)", "덕적초중고등학교(분기)"
     ],
 
-    // 3. 공통 유틸리티 함수
-    /**
-     * 시간 선택 <select> 엘리먼트에 08:00-17:30 옵션을 채웁니다.
-     * @param {HTMLSelectElement} startSelectEl - 시작 시간 select 엘리먼트
-     * @param {HTMLSelectElement} endSelectEl - 종료 시간 select 엘리먼트
-     */
+    // 공통 유틸리티 함수
     fillTimeOptions: (startSelectEl, endSelectEl) => {
         if (!startSelectEl || !endSelectEl) return;
         startSelectEl.innerHTML = "";
@@ -34,32 +26,18 @@ window.App = {
         for (let h = 8; h <= 17; h++) {
             for (let m = 0; m < 60; m += 30) {
                 const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-                const startOption = new Option(timeStr, timeStr);
-                const endOption = new Option(timeStr, timeStr);
-                startSelectEl.add(startOption);
-                endSelectEl.add(endOption);
+                startSelectEl.add(new Option(timeStr, timeStr));
+                endSelectEl.add(new Option(timeStr, timeStr));
             }
         }
     },
 
-    /**
-     * 현재 로그인한 사용자의 방문 일정을 가져옵니다.
-     * @param {string | null} rangeStart - 조회 시작일 (YYYY-MM-DD)
-     * @param {string | null} rangeEnd - 조회 종료일 (YYYY-MM-DD)
-     * @returns {Promise<Array>} - 방문 일정 데이터 배열
-     */
     fetchMyVisits: async (rangeStart = null, rangeEnd = null) => {
-        if (!App.user) {
-            console.warn("사용자 정보가 없어 일정을 가져올 수 없습니다.");
-            return [];
-        }
-        
+        if (!App.user) return [];
         let query = App.supabase.from('visits').select('*').eq('user_id', App.user.id);
         if (rangeStart) query = query.gte('visit_date', rangeStart);
         if (rangeEnd) query = query.lte('visit_date', rangeEnd);
-        
         const { data, error } = await query.order('visit_date', { ascending: true });
-        
         if (error) {
             console.error("일정 조회 중 에러 발생:", error);
             return [];
@@ -68,53 +46,84 @@ window.App = {
     },
 
     /**
-     * 페이지 접근 권한을 확인하고 사용자 정보를 설정합니다.
-     * login.html을 제외한 모든 페이지에서 세션이 없으면 로그인 페이지로 리디렉션합니다.
+     * 페이지 접근 권한을 확인하고, 로그인 상태에 따라 UI를 업데이트합니다.
      */
     handleAuth: async () => {
-        // 로그인 페이지에 있다면 가드 로직을 실행하지 않음
+        const { data: { session } } = await App.supabase.auth.getSession();
+        App.user = session?.user || null;
+
+        // 로그인 페이지에서는 UI 업데이트 로직을 실행하지 않음
         if (location.pathname.includes('login.html')) {
             return;
         }
-
-        const { data: { session }, error } = await App.supabase.auth.getSession();
-
-        if (error) {
-            console.error("세션 확인 중 에러:", error);
-            location.href = 'login.html';
-            return;
-        }
-
-        if (!session) {
-            location.href = 'login.html';
-        } else {
-            App.user = session.user; // 전역 객체에 사용자 정보 저장
-            App.updateUserInfoUI(); // 헤더의 사용자 정보 UI 업데이트
-        }
+        
+        App.updateMainUI();
     },
     
     /**
-     * 헤더의 사용자 정보 UI를 업데이트합니다.
+     * 메인 페이지(index.html)의 UI를 로그인 상태에 따라 업데이트합니다.
      */
-    updateUserInfoUI: () => {
-        if (!App.user) return;
+    updateMainUI: () => {
+        const userInfoEl = document.getElementById('userInfo');
+        const sidebarLoginFormEl = document.getElementById('sidebarLoginForm');
         
-        // 새로운 디자인에는 이메일과 로그아웃 버튼이 명시적으로 없으므로,
-        // 콘솔에만 로그를 남기거나 필요시 UI 요소를 찾아 업데이트합니다.
-        // 예: const userEmailEl = document.querySelector('.user-info .email');
-        // if (userEmailEl) userEmailEl.textContent = App.user.email;
-        console.log(`로그인된 사용자: ${App.user.email}`);
+        if (!userInfoEl || !sidebarLoginFormEl) return;
 
-        // 로그아웃 버튼 (만약 존재한다면)
-        const logoutBtn = document.getElementById('logoutBtn'); // 예시 ID
-        if (logoutBtn) {
-            logoutBtn.onclick = async () => {
-                await App.supabase.auth.signOut();
-                location.href = 'login.html';
-            };
+        if (App.user) {
+            // [로그인 상태] 사용자 정보 표시, 로그인 폼 숨김
+            userInfoEl.style.display = 'block';
+            sidebarLoginFormEl.style.display = 'none';
+
+            const userEmailEl = userInfoEl.querySelector('.email');
+            if (userEmailEl) userEmailEl.textContent = App.user.email;
+
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.onclick = async () => {
+                    await App.supabase.auth.signOut();
+                    location.reload();
+                };
+            }
+        } else {
+            // [로그아웃 상태] 사용자 정보 숨김, 로그인 폼 표시
+            userInfoEl.style.display = 'none';
+            sidebarLoginFormEl.style.display = 'block';
         }
+        
+        // 사이드바 로그인 폼에 이벤트 리스너 연결
+        App.attachSidebarLoginForm();
+    },
+
+    /**
+     * 사이드바 로그인 폼에 로그인 기능을 연결합니다.
+     */
+    attachSidebarLoginForm: () => {
+        const form = document.getElementById('loginFormSidebar');
+        if (!form) return;
+
+        // 중복 연결을 방지하기 위해 기존 이벤트 리스너를 제거할 수 있습니다.
+        // form.onsubmit = null; 
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('sidebar-email').value;
+            const password = document.getElementById('sidebar-password').value;
+            const errorMessageEl = document.getElementById('sidebar-error-message');
+            
+            errorMessageEl.style.display = 'none';
+
+            const { error } = await App.supabase.auth.signInWithPassword({ email, password });
+
+            if (error) {
+                errorMessageEl.textContent = "로그인 실패. 정보를 확인하세요.";
+                errorMessageEl.style.display = 'block';
+                return;
+            }
+            // 로그인 성공 시 페이지 새로고침하여 전체 UI 업데이트
+            location.reload();
+        };
     }
 };
 
-// 4. 페이지가 로드될 때 항상 인증 상태를 확인합니다.
+// 페이지가 로드될 때 항상 인증 상태를 확인합니다.
 document.addEventListener('DOMContentLoaded', App.handleAuth);
