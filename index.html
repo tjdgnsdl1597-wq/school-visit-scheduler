@@ -1,87 +1,96 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>방문 일정 대시보드</title>
-    <!-- Google Fonts & Stylesheet -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <!-- FullCalendar & Supabase JS -->
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
-    <script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>방문 일정 대시보드</title>
+
+  <!-- Fonts & Styles -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <header class="topbar">
-        <div class="brand">
-            <div class="logo"></div>
-            <h1>인천광역시학교안전공제회 산업안전팀</h1>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo"></div>
+      <h1>인천광역시학교안전공제회 산업안전팀</h1>
+    </div>
+    <nav class="nav">
+      <a href="index.html" class="active">한눈에보기</a>
+      <a href="#">학교정리</a>
+      <a href="schedule.html">일정관리</a>
+      <a href="#">업무관리</a>
+      <a href="#" class="disabled">교육자료</a>
+      <a href="#" class="disabled">안전보건표지</a>
+    </nav>
+    <div class="search-box">
+      <input type="text" placeholder="검색" />
+      <button class="search-btn"></button>
+    </div>
+  </header>
+
+  <main class="container">
+    <aside class="sidebar">
+      <section class="panel user-panel">
+        <div class="user-photo" style="background-image:url('https://i.pravatar.cc/100?u=kang');"></div>
+        <h2 class="user-name">대리 강성훈</h2>
+        <div class="user-details">
+          <p>입사 : 25.03.17(00일차)</p>
+          <p>특징 : 노는거 좋아함</p>
         </div>
-        <nav class="nav">
-            <a href="index.html" class="active">한눈에보기</a>
-            <a href="#">학교정리</a>
-            <a href="schedule.html">일정관리</a>
-            <a href="#">업무관리</a>
-            <a href="#" class="disabled">교육자료</a>
-            <a href="#" class="disabled">안전보건표지</a>
-        </nav>
-        <div class="search-box">
-            <input type="text" placeholder="검색">
-            <button class="search-btn"></button>
+      </section>
+
+      <section class="panel todo-panel">
+        <h3 class="panel-title">미완료업무</h3>
+        <div class="todo-list">
+          <div class="empty-message">업무 목록 로딩 중...</div>
         </div>
-    </header>
+      </section>
+    </aside>
 
-    <main class="container">
-        <aside class="sidebar">
-            <section class="panel user-panel">
-                 <div class="user-photo" style="background-image: url('https://i.pravatar.cc/100?u=kang');"></div>
-                 <h2 class="user-name">대리 강성훈</h2>
-                 <div class="user-details">
-                    <p>입사 : 25.03.17(00일차)</p>
-                    <p>특징 : 노는거 좋아함</p>
-                 </div>
-            </section>
+    <section class="main-content">
+      <div class="calendar-header">
+        <div class="calendar-title">
+          <span class="year">2025</span>
+          <h2 class="month">8월</h2>
+        </div>
+        <div class="calendar-controls">
+          <button id="calendar-prev">‹</button>
+          <button id="calendar-next">›</button>
+        </div>
+      </div>
 
-            <section class="panel todo-panel">
-                <h3 class="panel-title">미완료업무</h3>
-                <div class="todo-list">
-                    <div class="empty-message">업무 목록 로딩 중...</div>
-                </div>
-            </section>
-        </aside>
+      <div id="calendar"></div>
 
-        <section class="main-content">
-            <div class="calendar-header">
-                <div class="calendar-title">
-                    <span class="year">2025</span>
-                    <h2 class="month">8월</h2>
-                </div>
-                <div class="calendar-controls">
-                    <button id="calendar-prev">‹</button>
-                    <button id="calendar-next">›</button>
-                </div>
-            </div>
-            <div id="calendar"></div>
-            <div class="widget-container">
-                <div class="panel widget">
-                    <h3 class="panel-title">메모사항</h3>
-                    <textarea></textarea>
-                </div>
-                <div class="panel widget">
-                    <h3 class="panel-title">학교 산업재해</h3>
-                    <div class="widget-content"></div>
-                </div>
-                <div class="panel widget">
-                    <h3 class="panel-title">노동부 산재알리미</h3>
-                    <div class="widget-content"></div>
-                </div>
-            </div>
-        </section>
-    </main>
+      <div class="widget-container">
+        <div class="panel widget">
+          <h3 class="panel-title">메모사항</h3>
+          <textarea></textarea>
+        </div>
+        <div class="panel widget">
+          <h3 class="panel-title">학교 산업재해</h3>
+          <div class="widget-content"></div>
+        </div>
+        <div class="panel widget">
+          <h3 class="panel-title">노동부 산재알리미</h3>
+          <div class="widget-content"></div>
+        </div>
+      </div>
+    </section>
+  </main>
 
-    <script src="app.js"></script>
-    <script src="home.js"></script>
+  <!-- ===== JS: 로드 순서 유지 (중복 금지) ===== -->
+  <!-- FullCalendar 먼저 -->
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.11/locales/ko.global.min.js"></script>
+
+  <!-- Supabase UMD -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+
+  <!-- 전역 App → 페이지 스크립트 -->
+  <script src="app.js"></script>
+  <script src="home.js"></script>
 </body>
 </html>
