@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>일정관리 | 방문 일정 대시보드</title>
+    <title>홈 | 방문 일정 대시보드</title>
     <!-- Tailwind CSS for modern styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FullCalendar -->
@@ -99,7 +99,7 @@
         }
         .container {
             display: grid;
-            grid-template-columns: 1fr 2fr;
+            grid-template-columns: 3fr 1fr;
             gap: 1.5rem;
             padding: 2rem;
             max-width: 1400px;
@@ -171,98 +171,6 @@
         .small {
             font-size: 0.875rem;
         }
-        .form-group {
-            margin-bottom: 1rem;
-        }
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-        .form-group input[type="date"],
-        .form-group input[type="time"],
-        .form-group select {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid #d1d5db;
-            border-radius: 0.5rem;
-        }
-        .form-group input[type="checkbox"] {
-            margin-right: 0.5rem;
-        }
-        .form-actions {
-            margin-top: 1.5rem;
-        }
-        .btn-primary {
-            background-color: #4b5563;
-            color: #ffffff;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            width: 100%;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .btn-primary:hover {
-            background-color: #1f2937;
-        }
-        
-        /* Modal styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 2000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(5px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .modal-content {
-            background-color: #fefefe;
-            padding: 2rem;
-            border-radius: 1rem;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            width: 90%;
-            max-width: 500px;
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-        .close-btn {
-            color: #aaa;
-            font-size: 1.5rem;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .modal-body p {
-            margin-bottom: 0.5rem;
-        }
-        .modal-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.75rem;
-            margin-top: 1.5rem;
-        }
-        .btn-edit {
-            background-color: #3498db;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-        }
-        .btn-delete {
-            background-color: #e74c3c;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-        }
     </style>
 </head>
 <body>
@@ -275,8 +183,8 @@
             </div>
         </div>
         <nav class="nav">
-            <a href="index.html">학교정리</a>
-            <a href="schedule.html" class="active">일정관리</a>
+            <a href="index.html" class="active">학교정리</a>
+            <a href="schedule.html">일정관리</a>
             <a href="#" class="disabled">업무관리</a>
             <a href="#" class="disabled">교육자료</a>
             <a href="#" class="disabled">안전보건표지</a>
@@ -289,168 +197,61 @@
     </header>
 
     <main class="container">
-        <!-- 일정 입력 패널 -->
-        <section class="panel">
-            <h2 class="panel-title">일정 입력</h2>
-            <form id="scheduleForm">
-                <div class="form-group">
-                    <label for="visitDate">방문일시</label>
-                    <input type="date" id="visitDate" required>
-                </div>
-                <div class="form-group">
-                    <label>방문시간</label>
-                    <div class="flex gap-2">
-                        <select id="startHour" required class="flex-1">
-                            <option value="">시작 시간</option>
-                        </select>
-                        <select id="startMinute" required class="flex-1">
-                            <option value="">분</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>종료시간</label>
-                    <div class="flex gap-2">
-                        <select id="endHour" required class="flex-1">
-                            <option value="">종료 시간</option>
-                        </select>
-                        <select id="endMinute" required class="flex-1">
-                            <option value="">분</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="schoolSelect">학교 선택</label>
-                    <select id="schoolSelect" required>
-                        <option value="">학교를 선택하세요</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>방문목적(복수 선택)</label>
-                    <div class="flex flex-wrap gap-4">
-                        <div>
-                            <input type="checkbox" id="purpose1" value="월점검">
-                            <label for="purpose1">월점검</label>
-                        </div>
-                        <div>
-                            <input type="checkbox" id="purpose2" value="위험성평가">
-                            <label for="purpose2">위험성평가</label>
-                        </div>
-                        <div>
-                            <input type="checkbox" id="purpose3" value="근골격계 조사">
-                            <label for="purpose3">근골격계 조사</label>
-                        </div>
-                        <div>
-                            <input type="checkbox" id="purpose4" value="교육">
-                            <label for="purpose4">교육</label>
-                        </div>
-                        <div class="flex flex-col">
-                            <div class="flex items-center">
-                                <input type="checkbox" id="purpose5" value="기타">
-                                <label for="purpose5">기타</label>
-                            </div>
-                            <input type="text" id="otherPurposeInput" placeholder="기타 내용 입력" class="mt-2 w-full p-2 border rounded-md" hidden>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn-primary">저장</button>
-                </div>
-            </form>
+        <section class="panel calendar-panel">
+            <h2 class="panel-title">내 달력</h2>
+            <div id="homeCalendar"></div>
         </section>
 
-        <!-- 내 일정 캘린더 패널 -->
-        <section class="panel">
-            <h2 class="panel-title">내 일정 캘린더</h2>
-            <div id="scheduleCalendar"></div>
-        </section>
+        <aside class="sidebar">
+            <section class="panel">
+                <h3 class="panel-title">미완료업무</h3>
+                <ul id="todoList" class="list"></ul>
+            </section>
+            <section class="panel">
+                <h3 class="panel-title">메모사항</h3>
+                <textarea id="memoBox" placeholder="메모를 입력하세요" rows="6"></textarea>
+            </section>
+            <section class="panel">
+                <h3 class="panel-title">학교 산업재해</h3>
+                <div class="muted small">추가 예정</div>
+            </section>
+            <section class="panel">
+                <h3 class="panel-title">노동부 산재알리미</h3>
+                <div class="muted small">추가 예정</div>
+            </section>
+        </aside>
     </main>
-
-    <!-- Modal for event details and actions -->
-    <div id="eventModal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalTitle" class="text-xl font-bold">일정 상세</h3>
-                <span class="close-btn" id="closePopupBtn">&times;</span>
-            </div>
-            <div class="modal-body">
-                <p><strong>학교:</strong> <span id="modalSchoolName"></span></p>
-                <p><strong>일시:</strong> <span id="modalDateTime"></span></p>
-                <p><strong>목적:</strong> <span id="modalPurposes"></span></p>
-            </div>
-            <div class="modal-footer">
-                <button id="editEventBtn" class="btn-edit">수정</button>
-                <button id="deleteEventBtn" class="btn-delete">삭제</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Confirm Modal for deletion -->
-    <div id="confirmModal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="text-xl font-bold">일정 삭제</h3>
-                <span class="close-btn" id="closeConfirmBtn">&times;</span>
-            </div>
-            <div class="modal-body">
-                <p>이 일정을 정말 삭제하시겠습니까?</p>
-            </div>
-            <div class="modal-footer">
-                <button id="cancelDeleteBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-md">취소</button>
-                <button id="confirmDeleteBtn" class="btn-delete">삭제</button>
-            </div>
-        </div>
-    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', async function() {
-            // Supabase 클라이언트 초기화 (index.html과 동일)
-            // const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-            // const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-            // const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            const supabase = null;
+            // Supabase 클라이언트 초기화
+            const SUPABASE_URL = 'https://harsxljqcnyfgsueiwvq.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhcnN4bGpxY255ZmdzdWVpd3ZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NDQ2OTYsImV4cCI6MjA3MDUyMDY5Nn0.jyXqWN_IwNagbxXCikO2dJxvegWS0Wblo79rb87f2Rg';
+            const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
             const userEmailEl = document.getElementById('userEmail');
             const logoutBtn = document.getElementById('logoutBtn');
-            const scheduleCalendarEl = document.getElementById('scheduleCalendar');
-            
-            // Modal elements
-            const eventModal = document.getElementById('eventModal');
-            const closePopupBtn = document.getElementById('closePopupBtn');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalSchoolName = document.getElementById('modalSchoolName');
-            const modalDateTime = document.getElementById('modalDateTime');
-            const modalPurposes = document.getElementById('modalPurposes');
-            const editEventBtn = document.getElementById('editEventBtn');
-            const deleteEventBtn = document.getElementById('deleteEventBtn');
-            
-            // Confirm Modal elements
-            const confirmModal = document.getElementById('confirmModal');
-            const closeConfirmBtn = document.getElementById('closeConfirmBtn');
-            const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
-            const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+            const homeCalendarEl = document.getElementById('homeCalendar');
+            const todoListEl = document.getElementById('todoList');
+            const memoBoxEl = document.getElementById('memoBox');
 
+            // 1. 사용자 인증 및 UI 업데이트
+            const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-            // 1. 사용자 인증 및 UI 업데이트 (index.html과 동일)
-            const authState = {
-                user: { email: 'user@example.com' } // 임시 사용자 정보
-            };
-
-            if (authState.user) {
-                userEmailEl.textContent = authState.user.email;
+            if (user) {
+                userEmailEl.textContent = user.email;
             } else {
                 userEmailEl.textContent = '로그아웃됨';
                 logoutBtn.style.display = 'none';
             }
 
             logoutBtn.addEventListener('click', async () => {
-                // await supabase.auth.signOut();
-                alert('로그아웃되었습니다.');
+                await supabase.auth.signOut();
                 window.location.reload();
             });
-            
-            // 2. FullCalendar 초기화 (일정관리용)
-            const calendar = new FullCalendar.Calendar(scheduleCalendarEl, {
+
+            // 2. FullCalendar 초기화 (Supabase 실시간 동기화 포함)
+            const calendar = new FullCalendar.Calendar(homeCalendarEl, {
                 locale: 'ko',
                 initialView: 'dayGridMonth',
                 headerToolbar: {
@@ -458,214 +259,104 @@
                     center: 'title',
                     right: 'dayGridMonth,timeGridWeek,timeGridDay'
                 },
-                editable: true,
-                selectable: true,
-                events: [
-                    // 여기에 Supabase에서 가져온 실제 이벤트를 넣습니다.
-                    {
-                        id: 'event1',
-                        title: '방문: 강서고등학교',
-                        start: '2025-08-10T10:00:00',
-                        end: '2025-08-10T12:00:00',
-                        color: '#3498db',
-                        extendedProps: {
-                            schoolName: '강서고등학교',
-                            purposes: ['월점검', '위험성평가']
-                        }
-                    },
-                    {
-                        id: 'event2',
-                        title: '방문: 서강고등학교',
-                        start: '2025-08-12T14:30:00',
-                        color: '#2ecc71',
-                        extendedProps: {
-                             schoolName: '서강고등학교',
-                            purposes: ['교육']
-                        }
-                    },
-                    {
-                        id: 'event3',
-                        title: '일정3',
-                        start: '2025-08-12',
-                        color: '#e74c3c',
-                        extendedProps: {
-                            schoolName: '일정3 학교',
-                            purposes: ['기타']
-                        }
+                events: async function(fetchInfo, successCallback, failureCallback) {
+                    const { data: schedules, error } = await supabase
+                        .from('schedules')
+                        .select('*')
+                        .gte('start', fetchInfo.startStr)
+                        .lte('end', fetchInfo.endStr);
+
+                    if (error) {
+                        console.error('Error fetching schedules:', error.message);
+                        failureCallback(error);
+                    } else {
+                        const events = schedules.map(schedule => ({
+                            id: schedule.id,
+                            title: schedule.title,
+                            start: schedule.start,
+                            end: schedule.end,
+                            color: schedule.color,
+                            extendedProps: {
+                                schoolName: schedule.schoolName,
+                                purposes: schedule.purposes
+                            }
+                        }));
+                        successCallback(events);
                     }
-                ],
-                eventClick: function(info) {
-                    // eventClick 시 팝업창을 띄우는 로직
-                    const event = info.event;
-                    const startTime = event.start.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
-                    const endTime = event.end ? event.end.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '';
-                    const date = event.start.toLocaleDateString('ko-KR');
-
-                    modalTitle.textContent = event.title;
-                    modalSchoolName.textContent = event.extendedProps.schoolName || '정보 없음';
-                    modalDateTime.textContent = `${date} ${startTime} ~ ${endTime}`;
-                    modalPurposes.textContent = event.extendedProps.purposes ? event.extendedProps.purposes.join(', ') : '정보 없음';
-
-                    eventModal.classList.remove('hidden');
-
-                    // 수정/삭제 버튼에 이벤트 ID 연결
-                    editEventBtn.dataset.eventId = event.id;
-                    deleteEventBtn.dataset.eventId = event.id;
                 }
             });
             calendar.render();
 
-            // 3. 폼 필드 채우기 (시간 및 학교)
-            const startHourEl = document.getElementById('startHour');
-            const startMinuteEl = document.getElementById('startMinute');
-            const endHourEl = document.getElementById('endHour');
-            const endMinuteEl = document.getElementById('endMinute');
-            const schoolSelectEl = document.getElementById('schoolSelect');
-
-            function fillTimeOptions(hourEl, minuteEl) {
-                for (let i = 0; i < 24; i++) {
-                    const hour = String(i).padStart(2, '0');
-                    const option = document.createElement('option');
-                    option.value = hour;
-                    option.textContent = `${hour}시`;
-                    hourEl.appendChild(option);
+            // 3. 미완료 업무 목록 렌더링
+            async function renderTodoList() {
+                const { data: todos, error } = await supabase.from('todos').select('*');
+                
+                if (error) {
+                    console.error('Error fetching todos:', error.message);
+                    return;
                 }
-                for (let i = 0; i < 60; i += 30) {
-                    const minute = String(i).padStart(2, '0');
-                    const option = document.createElement('option');
-                    option.value = minute;
-                    option.textContent = `${minute}분`;
-                    minuteEl.appendChild(option);
-                }
-            }
-            fillTimeOptions(startHourEl, startMinuteEl);
-            fillTimeOptions(endHourEl, endMinuteEl);
-            
-            // 학교 목록 채우기 (Supabase에서 가져와야 함)
-            // const { data: schools, error } = await supabase.from('schools').select('id, name');
-            const schools = [{id: 1, name: '강서고등학교'}, {id: 2, name: '서강고등학교'}]; // 예시 데이터
 
-            if (schools) {
-                schools.forEach(school => {
-                    const option = document.createElement('option');
-                    option.value = school.id;
-                    option.textContent = school.name;
-                    schoolSelectEl.appendChild(option);
+                todoListEl.innerHTML = '';
+                todos.forEach(todo => {
+                    const li = document.createElement('li');
+                    li.classList.add('list-item');
+                    if (todo.completed) {
+                        li.classList.add('completed');
+                    }
+                    li.innerHTML = `
+                        <input type="checkbox" ${todo.completed ? 'checked' : ''} data-id="${todo.id}">
+                        <span>${todo.text}</span>
+                    `;
+                    todoListEl.appendChild(li);
+                });
+
+                todoListEl.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.addEventListener('change', async (e) => {
+                        const id = e.target.dataset.id;
+                        const isCompleted = e.target.checked;
+                        const { error } = await supabase.from('todos').update({ completed: isCompleted }).eq('id', id);
+                        if (error) {
+                            console.error('Error updating todo:', error.message);
+                        } else {
+                            e.target.parentElement.classList.toggle('completed', isCompleted);
+                        }
+                    });
                 });
             }
+            renderTodoList();
 
-            // 4. '기타' 체크박스에 대한 JavaScript 로직
-            const otherPurposeCheckbox = document.getElementById('purpose5');
-            const otherPurposeInput = document.getElementById('otherPurposeInput');
+            // 4. 메모사항 저장 및 불러오기 (localStorage 사용 예시)
+            function saveMemo() {
+                localStorage.setItem('userMemo', memoBoxEl.value);
+            }
 
-            otherPurposeCheckbox.addEventListener('change', function() {
-                if (this.checked) {
-                    otherPurposeInput.hidden = false;
-                    otherPurposeInput.required = true; // 필수 입력으로 설정
-                } else {
-                    otherPurposeInput.hidden = true;
-                    otherPurposeInput.required = false;
-                    otherPurposeInput.value = ''; // 체크 해제 시 내용 초기화
+            function loadMemo() {
+                const memo = localStorage.getItem('userMemo');
+                if (memo) {
+                    memoBoxEl.value = memo;
                 }
-            });
+            }
             
-            // 5. 폼 제출 핸들러
-            const scheduleForm = document.getElementById('scheduleForm');
-            scheduleForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                // 폼 데이터 수집
-                const visitDate = document.getElementById('visitDate').value;
-                const startHour = startHourEl.value;
-                const startMinute = startMinuteEl.value;
-                const endHour = endHourEl.value;
-                const endMinute = endMinuteEl.value;
-                const schoolId = schoolSelectEl.value;
-                const purposeCheckboxes = document.querySelectorAll('input[type="checkbox"]:checked');
-                let purposes = Array.from(purposeCheckboxes).map(cb => cb.value);
-
-                // '기타'가 선택되고 내용이 입력되었을 경우, 목적 배열에 추가
-                if (otherPurposeCheckbox.checked && otherPurposeInput.value.trim() !== '') {
-                    purposes = purposes.filter(p => p !== '기타'); // '기타' 자체는 제외하고
-                    purposes.push(otherPurposeInput.value.trim()); // 실제 입력 내용을 추가
-                }
-                
-                // Supabase에 데이터 저장하는 로직을 여기에 구현
-                const newEvent = {
-                    id: `event${Date.now()}`, // 임시 ID 생성
-                    title: `방문: ${schoolSelectEl.options[schoolSelectEl.selectedIndex].text}`,
-                    start: `${visitDate}T${startHour}:${startMinute}:00`,
-                    end: `${visitDate}T${endHour}:${endMinute}:00`,
-                    school_id: schoolId,
-                    purposes: purposes,
-                    extendedProps: {
-                        schoolName: schoolSelectEl.options[schoolSelectEl.selectedIndex].text,
-                        purposes: purposes
-                    }
-                };
-
-                // await supabase.from('schedules').insert([newEvent]);
-                alert('일정이 성공적으로 저장되었습니다!');
-                calendar.addEvent(newEvent); // 캘린더에 새 일정 추가
-                scheduleForm.reset();
-            });
-
-            // 6. 팝업창 관련 이벤트 핸들러
-            closePopupBtn.addEventListener('click', () => {
-                eventModal.classList.add('hidden');
-            });
-
-            eventModal.addEventListener('click', (e) => {
-                if (e.target === eventModal) {
-                    eventModal.classList.add('hidden');
-                }
-            });
-
-            // 수정 버튼 클릭 시
-            editEventBtn.addEventListener('click', () => {
-                const eventId = editEventBtn.dataset.eventId;
-                alert(`${eventId} 일정을 수정하는 기능을 여기에 구현합니다.`);
-                // 팝업 닫기
-                eventModal.classList.add('hidden');
-            });
+            memoBoxEl.addEventListener('input', saveMemo);
+            loadMemo();
             
-            // 삭제 버튼 클릭 시
-            deleteEventBtn.addEventListener('click', () => {
-                const eventId = deleteEventBtn.dataset.eventId;
-                // 'confirm' 대신 커스텀 모달 표시
-                confirmModal.classList.remove('hidden');
-                eventModal.classList.add('hidden'); // 기존 팝업 닫기
-                confirmDeleteBtn.dataset.eventId = eventId;
-            });
-            
-            // 삭제 확인 팝업 관련 이벤트 핸들러
-            closeConfirmBtn.addEventListener('click', () => {
-                confirmModal.classList.add('hidden');
-            });
+            // 5. Supabase 실시간 동기화 (일정, 할 일 목록)
+            supabase
+                .channel('realtime_schedules')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'schedules' }, payload => {
+                    console.log('Change received!', payload);
+                    calendar.refetchEvents();
+                })
+                .subscribe();
 
-            cancelDeleteBtn.addEventListener('click', () => {
-                confirmModal.classList.add('hidden');
-            });
-            
-            confirmDeleteBtn.addEventListener('click', () => {
-                const eventId = confirmDeleteBtn.dataset.eventId;
-                // 실제 삭제 로직 (Supabase와 연동)
-                // await supabase.from('schedules').delete().eq('id', eventId);
-                
-                // 캘린더에서 일정 삭제
-                const event = calendar.getEventById(eventId);
-                if (event) {
-                    event.remove();
-                }
-                
-                alert('일정이 삭제되었습니다.'); // 성공 메시지는 alert()로 표시 가능
-                confirmModal.classList.add('hidden');
-            });
-            
-            confirmModal.addEventListener('click', (e) => {
-                if (e.target === confirmModal) {
-                    confirmModal.classList.add('hidden');
-                }
-            });
+            supabase
+                .channel('realtime_todos')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'todos' }, payload => {
+                    console.log('Todo change received!', payload);
+                    renderTodoList();
+                })
+                .subscribe();
+
         });
     </script>
 </body>
