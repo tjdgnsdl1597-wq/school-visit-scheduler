@@ -47,7 +47,6 @@
             <section class="panel todo-panel">
                 <h3 class="panel-title">미완료업무</h3>
                 <div class="todo-list">
-                    <!-- JS에 의해 내용이 채워집니다 -->
                     <div class="empty-message">업무 목록 로딩 중...</div>
                 </div>
             </section>
@@ -55,8 +54,15 @@
 
         <section class="main-content">
             <div class="calendar-header">
-                <span class="year">2025</span>
-                <h2 class="month">8월</h2>
+                <div class="calendar-title">
+                    <span class="year">2025</span>
+                    <h2 class="month">8월</h2>
+                </div>
+                <!-- [수정] 이전/다음 버튼 추가 -->
+                <div class="calendar-controls">
+                    <button id="calendar-prev">‹</button>
+                    <button id="calendar-next">›</button>
+                </div>
             </div>
             <div id="calendar"></div>
             <div class="widget-container">
@@ -76,7 +82,6 @@
         </section>
     </main>
 
-    <!-- 기존 스크립트는 그대로 사용합니다 -->
     <script src="app.js"></script>
     <script src="home.js"></script>
 </body>
