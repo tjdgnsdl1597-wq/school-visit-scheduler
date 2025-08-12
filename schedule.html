@@ -1,96 +1,467 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>일정관리</title>
-  <link rel="stylesheet" href="style.css"/>
-  <!-- FullCalendar -->
-  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet"/>
-  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.11/locales/ko.global.min.js"></script>
-  <!-- Supabase -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>일정관리 | 방문 일정 대시보드</title>
+    <!-- Tailwind CSS for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FullCalendar -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.11/locales/ko.global.min.js"></script>
+    <!-- Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+    <style>
+        /* Custom styles for the dashboard */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #374151;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .topbar {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+        }
+        .logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 9999px;
+            margin-right: 0.75rem;
+        }
+        .brand-meta {
+            display: flex;
+            flex-direction: column;
+        }
+        .brand-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        .brand-sub {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        .nav {
+            display: flex;
+            gap: 1.5rem;
+        }
+        .nav a {
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            color: #6b7280;
+            transition: all 0.2s ease-in-out;
+            border-radius: 0.5rem;
+        }
+        .nav a:hover, .nav a.active {
+            color: #1f2937;
+            background-color: #f3f4f6;
+        }
+        .nav a.disabled {
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+        .userbox {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 9999px;
+        }
+        .btn {
+            background-color: #4b5563;
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #1f2937;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 1.5rem;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            flex-grow: 1;
+        }
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+        }
+        .panel {
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+        }
+        .panel-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #1f2937;
+        }
+        .list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .list-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .list-item:last-child {
+            border-bottom: none;
+        }
+        .list-item input[type="checkbox"] {
+            margin-right: 0.75rem;
+            accent-color: #4b5563;
+        }
+        .list-item span {
+            font-size: 0.875rem;
+            color: #4b5563;
+        }
+        .list-item.completed span {
+            text-decoration: line-through;
+            color: #9ca3af;
+        }
+        #memoBox {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid #d1d5db;
+            background-color: #f9fafb;
+            resize: vertical;
+            font-size: 0.875rem;
+            color: #374151;
+            transition: border-color 0.2s;
+        }
+        #memoBox:focus {
+            outline: none;
+            border-color: #4b5563;
+        }
+        .muted {
+            color: #9ca3af;
+        }
+        .small {
+            font-size: 0.875rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .form-group input[type="date"],
+        .form-group input[type="time"],
+        .form-group select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+        }
+        .form-group input[type="checkbox"] {
+            margin-right: 0.5rem;
+        }
+        .form-actions {
+            margin-top: 1.5rem;
+        }
+        .btn-primary {
+            background-color: #4b5563;
+            color: #ffffff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            width: 100%;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn-primary:hover {
+            background-color: #1f2937;
+        }
+    </style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <img src="assets/logo.png" alt="logo" class="logo">
-      <div class="brand-meta">
-        <div class="brand-title">일정관리</div>
-        <div class="brand-sub small">오전 2개 / 오후 2개 · 08:00~17:00 · 30분 단위</div>
-      </div>
-    </div>
-    <nav class="nav">
-      <a href="index.html">학교정리</a>
-      <a href="schedule.html" class="active">일정관리</a>
-      <a href="#" class="disabled">업무관리</a>
-      <a href="#" class="disabled">교육자료</a>
-      <a href="#" class="disabled">안전보건표지</a>
-    </nav>
-    <div class="userbox">
-      <img src="assets/profile.jpg" class="avatar" alt="me">
-      <span id="userEmail">...</span>
-      <button id="logoutBtn" class="btn">로그아웃</button>
-    </div>
-  </header>
-
-  <main class="container">
-    <section class="panel">
-      <h2 class="panel-title">일정 입력</h2>
-      <form id="visitForm" class="grid">
-        <label>방문일시
-          <input type="date" id="visitDate" required />
-        </label>
-
-        <label>오전/오후
-          <select id="half" required>
-            <option value="오전">오전</option>
-            <option value="오후">오후</option>
-          </select>
-        </label>
-
-        <label>시작시간
-          <select id="startTime" required></select>
-        </label>
-
-        <label>종료시간
-          <select id="endTime" required></select>
-        </label>
-
-        <fieldset class="col-2">
-          <legend>방문용건(복수 선택)</legend>
-          <div class="checkrow" id="purposeList">
-            <label><input type="checkbox" value="월점검"> 월점검</label>
-            <label><input type="checkbox" value="위험성평가"> 위험성평가</label>
-            <label><input type="checkbox" value="근골조사"> 근골조사</label>
-            <label><input type="checkbox" value="교육" id="eduChk"> 교육</label>
-            <label><input type="checkbox" value="산재조사"> 산재조사</label>
-            <label><input type="checkbox" value="기타" id="etcChk"> 기타</label>
-          </div>
-          <div class="grid col-2">
-            <input type="text" id="eduType" placeholder="교육 선택 시 교육 종류" style="display:none;">
-            <input type="text" id="etcText" placeholder="기타 선택 시 내용" style="display:none;">
-          </div>
-        </fieldset>
-
-        <label class="col-2">학교 선택
-          <select id="schoolSelect" required></select>
-        </label>
-
-        <div class="col-2">
-          <button type="submit" class="btn primary" style="width:100%">저장</button>
+    <header class="topbar">
+        <div class="brand">
+            <img src="https://placehold.co/40x40/6b7280/ffffff?text=LOGO" alt="logo" class="logo">
+            <div class="brand-meta">
+                <div class="brand-title">인천광역시학교안전공제회 산업안전팀</div>
+                <div class="brand-sub">방문 일정 대시보드</div>
+            </div>
         </div>
-      </form>
-    </section>
+        <nav class="nav">
+            <a href="index.html">학교정리</a>
+            <a href="schedule.html" class="active">일정관리</a>
+            <a href="#" class="disabled">업무관리</a>
+            <a href="#" class="disabled">교육자료</a>
+            <a href="#" class="disabled">안전보건표지</a>
+        </nav>
+        <div class="userbox">
+            <img src="https://placehold.co/40x40/9ca3af/ffffff?text=ME" class="avatar" alt="me">
+            <span id="userEmail">...</span>
+            <button id="logoutBtn" class="btn">로그아웃</button>
+        </div>
+    </header>
 
-    <section class="panel">
-      <h2 class="panel-title">내 일정 캘린더</h2>
-      <div id="scheduleCalendar"></div>
-    </section>
-  </main>
+    <main class="container">
+        <!-- 일정 입력 패널 -->
+        <section class="panel">
+            <h2 class="panel-title">일정 입력</h2>
+            <form id="scheduleForm">
+                <div class="form-group">
+                    <label for="visitDate">방문일시</label>
+                    <input type="date" id="visitDate" required>
+                </div>
+                <div class="form-group">
+                    <label>방문시간</label>
+                    <div class="flex gap-2">
+                        <select id="startHour" required class="flex-1">
+                            <option value="">시작 시간</option>
+                        </select>
+                        <select id="startMinute" required class="flex-1">
+                            <option value="">분</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>종료시간</label>
+                    <div class="flex gap-2">
+                        <select id="endHour" required class="flex-1">
+                            <option value="">종료 시간</option>
+                        </select>
+                        <select id="endMinute" required class="flex-1">
+                            <option value="">분</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="schoolSelect">학교 선택</label>
+                    <select id="schoolSelect" required>
+                        <option value="">학교를 선택하세요</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>방문목적(복수 선택)</label>
+                    <div class="flex flex-wrap gap-4">
+                        <div>
+                            <input type="checkbox" id="purpose1" value="월점검">
+                            <label for="purpose1">월점검</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="purpose2" value="위험성평가">
+                            <label for="purpose2">위험성평가</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="purpose3" value="근골격계 조사">
+                            <label for="purpose3">근골격계 조사</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="purpose4" value="교육">
+                            <label for="purpose4">교육</label>
+                        </div>
+                        <div class="flex flex-col">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="purpose5" value="기타">
+                                <label for="purpose5">기타</label>
+                            </div>
+                            <input type="text" id="otherPurposeInput" placeholder="기타 내용 입력" class="mt-2 w-full p-2 border rounded-md" hidden>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">저장</button>
+                </div>
+            </form>
+        </section>
 
-  <script src="app.js"></script>
-  <script src="schedule.js"></script>
+        <!-- 내 일정 캘린더 패널 -->
+        <section class="panel">
+            <h2 class="panel-title">내 일정 캘린더</h2>
+            <div id="scheduleCalendar"></div>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Supabase 클라이언트 초기화 (index.html과 동일)
+            // const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+            // const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+            // const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            const supabase = null;
+
+            const userEmailEl = document.getElementById('userEmail');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const scheduleCalendarEl = document.getElementById('scheduleCalendar');
+
+            // 1. 사용자 인증 및 UI 업데이트 (index.html과 동일)
+            const authState = {
+                user: { email: 'user@example.com' } // 임시 사용자 정보
+            };
+
+            if (authState.user) {
+                userEmailEl.textContent = authState.user.email;
+            } else {
+                userEmailEl.textContent = '로그아웃됨';
+                logoutBtn.style.display = 'none';
+            }
+
+            logoutBtn.addEventListener('click', async () => {
+                alert('로그아웃되었습니다.');
+                window.location.reload();
+            });
+
+            // 2. FullCalendar 초기화 (일정관리용)
+            const calendar = new FullCalendar.Calendar(scheduleCalendarEl, {
+                locale: 'ko',
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                editable: true,
+                selectable: true,
+                events: [
+                    // 여기에 Supabase에서 가져온 실제 이벤트를 넣습니다.
+                    {
+                        title: '일정1',
+                        start: '2025-08-10T10:00:00',
+                        end: '2025-08-10T12:00:00',
+                        color: '#3498db'
+                    },
+                    {
+                        title: '일정2',
+                        start: '2025-08-12T14:30:00',
+                        color: '#2ecc71'
+                    },
+                    {
+                        title: '일정3',
+                        start: '2025-08-12',
+                        color: '#e74c3c'
+                    }
+                ],
+                eventClick: function(info) {
+                    alert('일정 제목: ' + info.event.title);
+                }
+            });
+            calendar.render();
+
+            // 3. 폼 필드 채우기 (시간 및 학교)
+            const startHourEl = document.getElementById('startHour');
+            const startMinuteEl = document.getElementById('startMinute');
+            const endHourEl = document.getElementById('endHour');
+            const endMinuteEl = document.getElementById('endMinute');
+            const schoolSelectEl = document.getElementById('schoolSelect');
+
+            function fillTimeOptions(hourEl, minuteEl) {
+                for (let i = 0; i < 24; i++) {
+                    const hour = String(i).padStart(2, '0');
+                    const option = document.createElement('option');
+                    option.value = hour;
+                    option.textContent = `${hour}시`;
+                    hourEl.appendChild(option);
+                }
+                for (let i = 0; i < 60; i += 30) {
+                    const minute = String(i).padStart(2, '0');
+                    const option = document.createElement('option');
+                    option.value = minute;
+                    option.textContent = `${minute}분`;
+                    minuteEl.appendChild(option);
+                }
+            }
+            fillTimeOptions(startHourEl, startMinuteEl);
+            fillTimeOptions(endHourEl, endMinuteEl);
+            
+            // 학교 목록 채우기 (Supabase에서 가져와야 함)
+            // const { data: schools, error } = await supabase.from('schools').select('id, name');
+            const schools = [{id: 1, name: '강서고등학교'}, {id: 2, name: '서강고등학교'}]; // 예시 데이터
+
+            if (schools) {
+                schools.forEach(school => {
+                    const option = document.createElement('option');
+                    option.value = school.id;
+                    option.textContent = school.name;
+                    schoolSelectEl.appendChild(option);
+                });
+            }
+
+            // 4. '기타' 체크박스에 대한 JavaScript 로직
+            const otherPurposeCheckbox = document.getElementById('purpose5');
+            const otherPurposeInput = document.getElementById('otherPurposeInput');
+
+            otherPurposeCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    otherPurposeInput.hidden = false;
+                    otherPurposeInput.required = true; // 필수 입력으로 설정
+                } else {
+                    otherPurposeInput.hidden = true;
+                    otherPurposeInput.required = false;
+                    otherPurposeInput.value = ''; // 체크 해제 시 내용 초기화
+                }
+            });
+
+            // 5. 폼 제출 핸들러
+            const scheduleForm = document.getElementById('scheduleForm');
+            scheduleForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                // 폼 데이터 수집
+                const visitDate = document.getElementById('visitDate').value;
+                const startHour = startHourEl.value;
+                const startMinute = startMinuteEl.value;
+                const endHour = endHourEl.value;
+                const endMinute = endMinuteEl.value;
+                const schoolId = schoolSelectEl.value;
+                const purposeCheckboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+                let purposes = Array.from(purposeCheckboxes).map(cb => cb.value);
+
+                // '기타'가 선택되고 내용이 입력되었을 경우, 목적 배열에 추가
+                if (otherPurposeCheckbox.checked && otherPurposeInput.value.trim() !== '') {
+                    purposes = purposes.filter(p => p !== '기타'); // '기타' 자체는 제외하고
+                    purposes.push(otherPurposeInput.value.trim()); // 실제 입력 내용을 추가
+                }
+
+                // Supabase에 데이터 저장하는 로직을 여기에 구현
+                const newEvent = {
+                    title: `방문: ${schoolSelectEl.options[schoolSelectEl.selectedIndex].text}`,
+                    start: `${visitDate}T${startHour}:${startMinute}:00`,
+                    end: `${visitDate}T${endHour}:${endMinute}:00`,
+                    school_id: schoolId,
+                    purposes: purposes
+                };
+
+                // await supabase.from('schedules').insert([newEvent]);
+                alert('일정이 성공적으로 저장되었습니다!');
+                calendar.addEvent(newEvent); // 캘린더에 새 일정 추가
+                scheduleForm.reset();
+            });
+        });
+    </script>
 </body>
 </html>
