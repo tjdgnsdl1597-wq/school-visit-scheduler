@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>일정관리</title>
+  <link rel="stylesheet" href="style.css"/>
+  <!-- FullCalendar -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.11/locales/ko.global.min.js"></script>
+  <!-- Supabase -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img src="assets/logo.png" alt="logo" class="logo">
+      <div class="brand-meta">
+        <div class="brand-title">일정관리</div>
+        <div class="brand-sub small">오전 2개 / 오후 2개 · 08:00~17:00 · 30분 단위</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <a href="index.html">학교정리</a>
+      <a href="schedule.html" class="active">일정관리</a>
+      <a href="#" class="disabled">업무관리</a>
+      <a href="#" class="disabled">교육자료</a>
+      <a href="#" class="disabled">안전보건표지</a>
+    </nav>
+    <div class="userbox">
+      <img src="assets/profile.jpg" class="avatar" alt="me">
+      <span id="userEmail">...</span>
+      <button id="logoutBtn" class="btn">로그아웃</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="panel">
+      <h2 class="panel-title">일정 입력</h2>
+      <form id="visitForm" class="grid">
+        <label>방문일시
+          <input type="date" id="visitDate" required />
+        </label>
+
+        <label>오전/오후
+          <select id="half" required>
+            <option value="오전">오전</option>
+            <option value="오후">오후</option>
+          </select>
+        </label>
+
+        <label>시작시간
+          <select id="startTime" required></select>
+        </label>
+
+        <label>종료시간
+          <select id="endTime" required></select>
+        </label>
+
+        <fieldset class="col-2">
+          <legend>방문용건(복수 선택)</legend>
+          <div class="checkrow" id="purposeList">
+            <label><input type="checkbox" value="월점검"> 월점검</label>
+            <label><input type="checkbox" value="위험성평가"> 위험성평가</label>
+            <label><input type="checkbox" value="근골조사"> 근골조사</label>
+            <label><input type="checkbox" value="교육" id="eduChk"> 교육</label>
+            <label><input type="checkbox" value="산재조사"> 산재조사</label>
+            <label><input type="checkbox" value="기타" id="etcChk"> 기타</label>
+          </div>
+          <div class="grid col-2">
+            <input type="text" id="eduType" placeholder="교육 선택 시 교육 종류" style="display:none;">
+            <input type="text" id="etcText" placeholder="기타 선택 시 내용" style="display:none;">
+          </div>
+        </fieldset>
+
+        <label class="col-2">학교 선택
+          <select id="schoolSelect" required></select>
+        </label>
+
+        <div class="col-2">
+          <button type="submit" class="btn primary" style="width:100%">저장</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2 class="panel-title">내 일정 캘린더</h2>
+      <div id="scheduleCalendar"></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+  <script src="schedule.js"></script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>로그인</title>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+</head>
+<body class="center">
+  <div class="auth-card">
+    <img src="assets/logo.png" class="logo" alt="logo">
+    <h1>로그인</h1>
+    <form id="loginForm" class="grid">
+      <input type="email" id="email" placeholder="이메일" required />
+      <input type="password" id="password" placeholder="비밀번호(최소 6자)" required />
+      <button type="submit" class="btn primary">로그인</button>
+      <button type="button" id="signupBtn" class="btn">회원가입</button>
+    </form>
+    <div class="muted small">로그인 후 사용 가능합니다.</div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "YOUR_SUPABASE_URL";
+    const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+
+    document.getElementById('loginForm').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const { error } = await supabase.auth.signInWithPassword({
+        email: emailInput.value, password: passwordInput.value
+      });
+      if (error) { alert('로그인 실패: ' + error.message); return; }
+      location.href = 'index.html';
+    });
+
+    document.getElementById('signupBtn').addEventListener('click', async ()=>{
+      const { error } = await supabase.auth.signUp({
+        email: emailInput.value, password: passwordInput.value
+      });
+      if (error) { alert('회원가입 실패: ' + error.message); return; }
+      alert('가입 완료! 이메일 확인 후 로그인하세요.');
+    });
+  </script>
+</body>
+</html>

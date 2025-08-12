@@ -2,87 +2,66 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>학교 방문 일정 예약</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css">
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>홈 | 방문 일정 대시보드</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- FullCalendar -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.11/locales/ko.global.min.js"></script>
+  <!-- Supabase -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 </head>
 <body>
-  <div class="wrap">
-    <div class="topbar">
-      <h1>학교 방문 일정 예약</h1>
-      <div>
-        <button id="loginBtn" class="ghost">로그인</button>
-        <button id="logoutBtn" class="ghost" style="display:none">로그아웃</button>
+  <header class="topbar">
+    <div class="brand">
+      <img src="assets/logo.png" alt="logo" class="logo">
+      <div class="brand-meta">
+        <div class="brand-title">인천광역시학교안전공제회 산업안전팀</div>
+        <div class="brand-sub">방문 일정 대시보드</div>
       </div>
     </div>
-
-    <div class="card">
-      <form id="visitForm" autocomplete="off">
-        <label>방문일시</label>
-        <input type="date" id="visitDate" required />
-
-        <div class="row">
-          <div>
-            <label>구분</label>
-            <select id="period">
-              <option value="">전체</option>
-              <option value="AM">오전</option>
-              <option value="PM">오후</option>
-            </select>
-          </div>
-          <div></div>
-        </div>
-
-        <div class="row">
-          <div>
-            <label>시작시간</label>
-            <select id="startTime" required></select>
-          </div>
-          <div>
-            <label>종료시간</label>
-            <select id="endTime" required></select>
-          </div>
-        </div>
-        <p class="hint">시간은 08:00 ~ 17:00, 30분 단위</p>
-
-        <label style="margin-top:14px;">방문 용건 (복수 선택)</label>
-        <div id="purposeList" class="grid-check">
-          <label class="pill"><input type="checkbox" value="월점검"> 월점검</label>
-          <label class="pill"><input type="checkbox" value="위험성평가"> 위험성평가</label>
-          <label class="pill"><input type="checkbox" value="근골조사"> 근골조사</label>
-          <label class="pill"><input type="checkbox" value="산재조사"> 산재조사</label>
-          <label class="pill"><input type="checkbox" value="교육"> 교육</label>
-          <label class="pill"><input type="checkbox" value="기타"> 기타</label>
-        </div>
-
-        <div class="row">
-          <div>
-            <label>교육 선택 시 종류</label>
-            <input type="text" id="eduType" placeholder="예: 근골교육 / 위험성평가 교육 / 정기교육">
-          </div>
-          <div>
-            <label>기타 선택 시 내용</label>
-            <input type="text" id="etcPurpose" placeholder="기타 방문 내용">
-          </div>
-        </div>
-
-        <label style="margin-top:14px;">학교 선택</label>
-        <select id="schoolSelect" required></select>
-
-        <button class="primary" type="submit">저장</button>
-      </form>
+    <nav class="nav">
+      <a href="index.html" class="active">학교정리</a>
+      <a href="schedule.html">일정관리</a>
+      <a href="#" class="disabled">업무관리</a>
+      <a href="#" class="disabled">교육자료</a>
+      <a href="#" class="disabled">안전보건표지</a>
+    </nav>
+    <div class="userbox">
+      <img src="assets/profile.jpg" class="avatar" alt="me">
+      <span id="userEmail">...</span>
+      <button id="logoutBtn" class="btn">로그아웃</button>
     </div>
+  </header>
 
-    <div class="card">
-      <h2 class="h2">내 일정 캘린더</h2>
-      <div id="calendar"></div>
-    </div>
-  </div>
+  <main class="container">
+    <section class="panel calendar-panel">
+      <h2 class="panel-title">내 달력</h2>
+      <div id="homeCalendar"></div>
+    </section>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/locales-all.global.min.js"></script>
-  <script src="script.js"></script>
+    <aside class="sidebar">
+      <section class="panel">
+        <h3 class="panel-title">미완료업무</h3>
+        <ul id="todoList" class="list"></ul>
+      </section>
+      <section class="panel">
+        <h3 class="panel-title">메모사항</h3>
+        <textarea id="memoBox" placeholder="메모를 입력하세요" rows="6"></textarea>
+      </section>
+      <section class="panel">
+        <h3 class="panel-title">학교 산업재해</h3>
+        <div class="muted small">추가 예정</div>
+      </section>
+      <section class="panel">
+        <h3 class="panel-title">노동부 산재알리미</h3>
+        <div class="muted small">추가 예정</div>
+      </section>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+  <script src="home.js"></script>
 </body>
 </html>
