@@ -1,41 +1,12 @@
-
 body {
     font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f8f9fa;
+    margin: 20px;
 }
-.container {
-    max-width: 600px;
-    margin: auto;
-    padding: 20px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-label {
-    font-weight: bold;
-    display: block;
+label, fieldset {
     margin-top: 10px;
+    display: block;
 }
-input, select, button {
-    width: 100%;
-    padding: 8px;
-    margin-top: 5px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-}
-button {
-    background: #007bff;
-    color: white;
-    cursor: pointer;
-    margin-top: 15px;
-}
-button:hover {
-    background: #0056b3;
-}
-@media (max-width: 600px) {
-    .container {
-        width: 95%;
-    }
+#calendar {
+    max-width: 900px;
+    margin: 20px auto;
 }
