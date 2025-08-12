@@ -564,3 +564,65 @@ a {
     padding: 10px;
     font-weight: 500;
 }
+/* =================================== */
+/* ===== New Sidebar Login Panel ===== */
+/* =================================== */
+
+.login-panel .panel-title {
+    border-bottom: none;
+    margin-bottom: 10px;
+}
+
+#loginFormSidebar {
+    position: relative;
+    padding-right: 70px; /* 확인 버튼 공간 확보 */
+}
+
+#loginFormSidebar .form-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+#loginFormSidebar label {
+    flex-shrink: 0;
+    width: 70px; /* 라벨 너비 고정 */
+    font-weight: 500;
+    font-size: 14px;
+}
+
+#loginFormSidebar input {
+    width: 100%;
+    border: 1px solid #000;
+    padding: 5px;
+    font-size: 14px;
+}
+
+#loginFormSidebar .btn-confirm {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 60px;
+    border: 2px solid #000;
+    background-color: #e0e0e0;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+#loginFormSidebar .error-message {
+    position: absolute;
+    bottom: -25px;
+    left: 0;
+    background: none;
+    padding: 0;
+    text-align: left;
+    font-size: 12px;
+}
+
+#logoutBtn {
+    width: 100%;
+    margin-top: 20px;
+    padding: 10px;
+    font-weight: 500;
+}
