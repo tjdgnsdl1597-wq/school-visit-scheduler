@@ -205,6 +205,64 @@
         .btn-primary:hover {
             background-color: #1f2937;
         }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 500px;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .close-btn {
+            color: #aaa;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .modal-body p {
+            margin-bottom: 0.5rem;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+        .btn-edit {
+            background-color: #3498db;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+        }
+        .btn-delete {
+            background-color: #e74c3c;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -308,6 +366,25 @@
         </section>
     </main>
 
+    <!-- Modal for event details and actions -->
+    <div id="eventModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle" class="text-xl font-bold">일정 상세</h3>
+                <span class="close-btn" id="closePopupBtn">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p><strong>학교:</strong> <span id="modalSchoolName"></span></p>
+                <p><strong>일시:</strong> <span id="modalDateTime"></span></p>
+                <p><strong>목적:</strong> <span id="modalPurposes"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button id="editEventBtn" class="btn-edit">수정</button>
+                <button id="deleteEventBtn" class="btn-delete">삭제</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', async function() {
             // Supabase 클라이언트 초기화 (index.html과 동일)
@@ -319,6 +396,16 @@
             const userEmailEl = document.getElementById('userEmail');
             const logoutBtn = document.getElementById('logoutBtn');
             const scheduleCalendarEl = document.getElementById('scheduleCalendar');
+            
+            // Modal elements
+            const eventModal = document.getElementById('eventModal');
+            const closePopupBtn = document.getElementById('closePopupBtn');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalSchoolName = document.getElementById('modalSchoolName');
+            const modalDateTime = document.getElementById('modalDateTime');
+            const modalPurposes = document.getElementById('modalPurposes');
+            const editEventBtn = document.getElementById('editEventBtn');
+            const deleteEventBtn = document.getElementById('deleteEventBtn');
 
             // 1. 사용자 인증 및 UI 업데이트 (index.html과 동일)
             const authState = {
@@ -333,10 +420,11 @@
             }
 
             logoutBtn.addEventListener('click', async () => {
+                // await supabase.auth.signOut();
                 alert('로그아웃되었습니다.');
                 window.location.reload();
             });
-
+            
             // 2. FullCalendar 초기화 (일정관리용)
             const calendar = new FullCalendar.Calendar(scheduleCalendarEl, {
                 locale: 'ko',
@@ -351,24 +439,50 @@
                 events: [
                     // 여기에 Supabase에서 가져온 실제 이벤트를 넣습니다.
                     {
-                        title: '일정1',
+                        id: 'event1',
+                        title: '방문: 강서고등학교',
                         start: '2025-08-10T10:00:00',
                         end: '2025-08-10T12:00:00',
-                        color: '#3498db'
+                        color: '#3498db',
+                        extendedProps: {
+                            schoolName: '강서고등학교',
+                            purposes: ['월점검', '위험성평가']
+                        }
                     },
                     {
-                        title: '일정2',
+                        id: 'event2',
+                        title: '방문: 서강고등학교',
                         start: '2025-08-12T14:30:00',
-                        color: '#2ecc71'
+                        color: '#2ecc71',
+                        extendedProps: {
+                             schoolName: '서강고등학교',
+                            purposes: ['교육']
+                        }
                     },
                     {
+                        id: 'event3',
                         title: '일정3',
                         start: '2025-08-12',
                         color: '#e74c3c'
                     }
                 ],
                 eventClick: function(info) {
-                    alert('일정 제목: ' + info.event.title);
+                    // eventClick 시 팝업창을 띄우는 로직
+                    const event = info.event;
+                    const startTime = event.start.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+                    const endTime = event.end ? event.end.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '';
+                    const date = event.start.toLocaleDateString('ko-KR');
+
+                    modalTitle.textContent = event.title;
+                    modalSchoolName.textContent = event.extendedProps.schoolName || '정보 없음';
+                    modalDateTime.textContent = `${date} ${startTime} ~ ${endTime}`;
+                    modalPurposes.textContent = event.extendedProps.purposes ? event.extendedProps.purposes.join(', ') : '정보 없음';
+
+                    eventModal.classList.remove('hidden');
+
+                    // 수정/삭제 버튼에 이벤트 ID 연결
+                    editEventBtn.dataset.eventId = event.id;
+                    deleteEventBtn.dataset.eventId = event.id;
                 }
             });
             calendar.render();
@@ -426,7 +540,7 @@
                     otherPurposeInput.value = ''; // 체크 해제 시 내용 초기화
                 }
             });
-
+            
             // 5. 폼 제출 핸들러
             const scheduleForm = document.getElementById('scheduleForm');
             scheduleForm.addEventListener('submit', async (e) => {
@@ -446,20 +560,62 @@
                     purposes = purposes.filter(p => p !== '기타'); // '기타' 자체는 제외하고
                     purposes.push(otherPurposeInput.value.trim()); // 실제 입력 내용을 추가
                 }
-
+                
                 // Supabase에 데이터 저장하는 로직을 여기에 구현
                 const newEvent = {
+                    id: `event${Date.now()}`, // 임시 ID 생성
                     title: `방문: ${schoolSelectEl.options[schoolSelectEl.selectedIndex].text}`,
                     start: `${visitDate}T${startHour}:${startMinute}:00`,
                     end: `${visitDate}T${endHour}:${endMinute}:00`,
                     school_id: schoolId,
-                    purposes: purposes
+                    purposes: purposes,
+                    extendedProps: {
+                        schoolName: schoolSelectEl.options[schoolSelectEl.selectedIndex].text,
+                        purposes: purposes
+                    }
                 };
 
                 // await supabase.from('schedules').insert([newEvent]);
                 alert('일정이 성공적으로 저장되었습니다!');
                 calendar.addEvent(newEvent); // 캘린더에 새 일정 추가
                 scheduleForm.reset();
+            });
+
+            // 6. 팝업창 관련 이벤트 핸들러
+            closePopupBtn.addEventListener('click', () => {
+                eventModal.classList.add('hidden');
+            });
+
+            eventModal.addEventListener('click', (e) => {
+                if (e.target === eventModal) {
+                    eventModal.classList.add('hidden');
+                }
+            });
+
+            // 수정 버튼 클릭 시
+            editEventBtn.addEventListener('click', () => {
+                const eventId = editEventBtn.dataset.eventId;
+                alert(`${eventId} 일정을 수정하는 기능을 여기에 구현합니다.`);
+                // 팝업 닫기
+                eventModal.classList.add('hidden');
+            });
+            
+            // 삭제 버튼 클릭 시
+            deleteEventBtn.addEventListener('click', () => {
+                const eventId = deleteEventBtn.dataset.eventId;
+                if (confirm(`${eventId} 일정을 정말 삭제하시겠습니까?`)) {
+                    // 실제 삭제 로직 (Supabase와 연동)
+                    // await supabase.from('schedules').delete().eq('id', eventId);
+                    
+                    // 캘린더에서 일정 삭제
+                    const event = calendar.getEventById(eventId);
+                    if (event) {
+                        event.remove();
+                    }
+                    
+                    alert('일정이 삭제되었습니다.');
+                    eventModal.classList.add('hidden');
+                }
             });
         });
     </script>
