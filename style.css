@@ -667,7 +667,7 @@ a {
   */
 }
 
-/* ===== 방문 목적: 2열 + 상세입력 오른쪽 ===== */
+/* ===== 방문 목적: 1열 체크박스 + 우측에 상세 입력 ===== */
 .purposes-group { display: block; }
 
 .purposes-group > label {
@@ -676,15 +676,22 @@ a {
   margin-bottom: 8px;
 }
 
-/* 2열 그리드 + 행 간격/열 간격 */
+/* 리스트는 세로로 1열 배치 */
 .purposes-group .purpose-list {
-  display: grid;
-  grid-template-columns: 1fr 1fr;    /* ← 두 칸 */
-  gap: 12px 24px;                    /* 행/열 간격 */
-  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;     /* 항목 간 간격 */
 }
 
-/* 체크+라벨 한 줄 */
+/* 각 항목은 2칸 그리드: [체크박스+라벨] | [상세입력] */
+.purposes-group .purpose-row {
+  display: grid;
+  grid-template-columns: max-content 1fr; /* 왼쪽은 내용폭, 오른쪽은 남는폭 */
+  align-items: center;
+  column-gap: 16px;
+}
+
+/* 체크박스와 라벨을 한 줄로 */
 .purposes-group .checkbox-group {
   display: flex;
   align-items: center;
@@ -696,7 +703,7 @@ a {
   line-height: 1.6;
 }
 
-/* 교육/기타의 상세 입력(기본 숨김 → 체크 시 보이게) */
+/* 상세 입력은 기본 숨김: JS가 체크 시 parentElement를 block으로 바꿔줌 */
 .purposes-group .sub-input { display: none; }
 .purposes-group .sub-input input {
   width: 100%;
@@ -707,15 +714,8 @@ a {
   outline: none;
 }
 
-/* 모바일에선 1열로 자동 전환 */
+/* 화면이 아주 좁으면 입력칸이 아래 줄로 내려가도록 */
 @media (max-width: 640px) {
-  .purposes-group .purpose-list { grid-template-columns: 1fr; }
-}
-
-/* 초기화 버튼: 글자 한 줄 강제 + 살짝 작게 */
-.form-actions .btn-secondary {
-  white-space: nowrap;   /* 줄바꿈 금지 */
-  font-size: 14px;       /* 살짝 축소 (필요시 13px로) */
-  line-height: 1.2;
-  padding: 10px 12px;    /* 너무 좁으면 숫자만 조금 키우세요 */
+  .purposes-group .purpose-row { grid-template-columns: 1fr; }
+  .purposes-group .sub-input { margin-left: 28px; } /* 체크박스 폭만큼 들여쓰기 느낌 */
 }
