@@ -129,6 +129,35 @@ function initializeSchedulePage() {
         if (checkedPurposes.includes('기타') && !etcPurposeInput.value.trim()) {
             return alert('기타 목적을 입력해주세요.');
         }
+// (추가) 시간/slot 검증
+if (!startTimeSelect.value || !endTimeSelect.value) {
+  formMessageEl.textContent = '시작/종료 시간을 선택하세요.';
+  formMessageEl.className = 'form-message error';
+  formMessageEl.style.display = 'block';
+  return;
+}
+
+// HH:MM 형식 확인
+const timeRe = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
+if (!timeRe.test(startTimeSelect.value) || !timeRe.test(endTimeSelect.value)) {
+  formMessageEl.textContent = '시간 형식이 올바르지 않습니다.';
+  formMessageEl.className = 'form-message error';
+  formMessageEl.style.display = 'block';
+  return;
+}
+
+// 종료가 시작보다 이후인지 확인
+const [sh, sm] = startTimeSelect.value.split(':').map(Number);
+const [eh, em] = endTimeSelect.value.split(':').map(Number);
+if (eh * 60 + em <= sh * 60 + sm) {
+  formMessageEl.textContent = '종료 시간은 시작 시간 이후여야 합니다.';
+  formMessageEl.className = 'form-message error';
+  formMessageEl.style.display = 'block';
+  return;
+}
+
+// (추가) slot 생성: "HH:MM-HH:MM"
+const slot = `${startTimeSelect.value}-${endTimeSelect.value}`;
 
 
 const newVisit = {
