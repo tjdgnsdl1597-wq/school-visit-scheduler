@@ -256,3 +256,8 @@ a { color: inherit; text-decoration: none; }
     .purposes-group .purpose-row { grid-template-columns: 1fr; }
     .purposes-group .sub-input { margin-left: 28px; }
 }
+/* 교육/기타 행은 2열 전체를 차지 → 입력칸이 가로 2배 */
+.purposes-group .purpose-row:has(#edu-type),
+.purposes-group .purpose-row:has(#etc-purpose) {
+  grid-column: 1 / -1; /* 부모 .purpose-list의 두 컬럼 모두 차지 */
+}
