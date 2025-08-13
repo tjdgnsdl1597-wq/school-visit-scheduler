@@ -626,3 +626,43 @@ a {
     padding: 10px;
     font-weight: 500;
 }
+
+/* ===== 방문 목적 섹션 전용 오버라이드 ===== */
+.purposes-group {
+  display: block;              /* 전역 .form-group의 flex 해제 (레이블을 위로) */
+}
+
+.purposes-group > label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.purposes-group .purpose-list {
+  display: flex;
+  flex-direction: column;      /* 체크박스 1열 세로 정렬 */
+  gap: 8px;                    /* 필요하면 12px로 조절 가능 */
+  width: 100%;
+}
+
+.purposes-group .checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;                    /* 체크박스-라벨 간격 */
+}
+
+.purposes-group .checkbox-group input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+.purposes-group .checkbox-group label {
+  white-space: nowrap;         /* 라벨을 한 줄로 고정 */
+  word-break: keep-all;        /* 한국어 중간 줄바꿈 방지 */
+  line-height: 1.6;
+  /* 길면 말줄임표 쓰고 싶으면 아래 두 줄도 추가
+  overflow: hidden;
+  text-overflow: ellipsis;
+  */
+}
