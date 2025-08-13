@@ -666,3 +666,56 @@ a {
   text-overflow: ellipsis;
   */
 }
+
+/* ===== 방문 목적: 2열 + 상세입력 오른쪽 ===== */
+.purposes-group { display: block; }
+
+.purposes-group > label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+/* 2열 그리드 + 행 간격/열 간격 */
+.purposes-group .purpose-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;    /* ← 두 칸 */
+  gap: 12px 24px;                    /* 행/열 간격 */
+  align-items: center;
+}
+
+/* 체크+라벨 한 줄 */
+.purposes-group .checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.purposes-group .checkbox-group label {
+  white-space: nowrap;
+  word-break: keep-all;
+  line-height: 1.6;
+}
+
+/* 교육/기타의 상세 입력(기본 숨김 → 체크 시 보이게) */
+.purposes-group .sub-input { display: none; }
+.purposes-group .sub-input input {
+  width: 100%;
+  padding: 4px 0;
+  border: 0;
+  border-bottom: 2px solid #0f172a; /* 밑줄 스타일 */
+  background: transparent;
+  outline: none;
+}
+
+/* 모바일에선 1열로 자동 전환 */
+@media (max-width: 640px) {
+  .purposes-group .purpose-list { grid-template-columns: 1fr; }
+}
+
+/* 초기화 버튼: 글자 한 줄 강제 + 살짝 작게 */
+.form-actions .btn-secondary {
+  white-space: nowrap;   /* 줄바꿈 금지 */
+  font-size: 14px;       /* 살짝 축소 (필요시 13px로) */
+  line-height: 1.2;
+  padding: 10px 12px;    /* 너무 좁으면 숫자만 조금 키우세요 */
+}
