@@ -136,11 +136,12 @@ const newVisit = {
     school: schoolSelect.value,
     start_time: startTimeSelect.value,
     end_time: endTimeSelect.value,
-    purposes: checkedPurposes, // 배열 그대로
+    half_day: periodSelect?.value || 'ALL',                 // ✅ 추가
+    slot: `${startTimeSelect.value}-${endTimeSelect.value}`, // ✅ 추가 (예: "09:00-11:00")
+    purposes: checkedPurposes, // 기존 그대로 (DB가 text면 join해서 문자열로 저장하세요)
     edu_text: eduTypeInput.value.trim() || null,
     other_text: etcPurposeInput.value.trim() || null
 };
-
 
         const { error } = await App.supabase.from('visits').insert([newVisit]);
 
